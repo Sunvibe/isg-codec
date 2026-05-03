@@ -25,7 +25,7 @@ The device-specific `tools/thz55eco_capture.py` tool captures Tecalor THZ 5.5 Ec
 Example for capturing global data:
 
 ```powershell
-py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --legacy-exact --initial-read-timeout 1.5 --delay 0.25 --buffer-size 200 --output tests\fixtures\thz55eco-global.bin
+py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 1.5 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.75 --output tests\fixtures\thz55eco-global.bin
 ```
 
 Known THZ 5.5 Eco commands:
@@ -35,7 +35,11 @@ Known THZ 5.5 Eco commands:
 - `F3` reads domestic hot water data.
 - `0A 09 1C` reads a consumption-related value.
 
-The `--legacy-exact` mode follows the behavior of the AppDaemon bridge this project was initially inspired by: after each protocol step, the tool sleeps once and then performs exactly one socket read with the configured buffer size.
+The early protocol phases are time-sensitive. The tool therefore uses separate phase timeouts: short init and request timeouts before sending the next protocol byte, and a longer payload timeout after the acknowledge byte.
+
+The `--legacy-exact` mode is still available for comparison with the AppDaemon bridge this project was initially inspired by: after each protocol step, the tool sleeps once and then performs exactly one socket read with the configured buffer size.
+
+See [THZ 5.5 Eco Protocol Notes](docs/thz55eco-protocol-notes.md) for the current request sequence, timing observations, and tuning ranges.
 
 ## Repository Structure
 

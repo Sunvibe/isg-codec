@@ -98,8 +98,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--read-timeout",
         type=float,
+        help="deprecated global idle timeout; overrides init, request, and payload timeouts when set",
+    )
+    parser.add_argument(
+        "--init-timeout",
+        type=float,
+        default=0.05,
+        help="short idle time in seconds while reading after the init byte before sending the request frame",
+    )
+    parser.add_argument(
+        "--request-timeout",
+        type=float,
+        default=0.05,
+        help="short idle time in seconds while reading after the request frame before sending the acknowledge byte",
+    )
+    parser.add_argument(
+        "--payload-timeout",
+        type=float,
         default=0.75,
-        help="maximum idle time in seconds while reading a response phase",
+        help="maximum idle time in seconds while reading the payload after the acknowledge byte",
     )
     parser.add_argument(
         "--initial-read-timeout",
@@ -153,11 +170,15 @@ def main() -> int:
     args = build_parser().parse_args()
     request = build_request(args.command)
     captured_payloads = bytearray()
+    init_timeout = args.read_timeout if args.read_timeout is not None else args.init_timeout
+    request_timeout = args.read_timeout if args.read_timeout is not None else args.request_timeout
+    payload_timeout = args.read_timeout if args.read_timeout is not None else args.payload_timeout
+    socket_timeout = min(init_timeout, request_timeout, payload_timeout, 0.25)
 
     try:
         with socket.create_connection((args.host, args.port), timeout=args.connect_timeout) as sock:
             print(f"connected to {args.host}:{args.port}")
-            sock.settimeout(min(args.read_timeout, 0.25))
+            sock.settimeout(socket_timeout)
 
             print_phase("command", args.command)
             print_phase("request frame", request)
@@ -178,7 +199,7 @@ def main() -> int:
                 if args.legacy_exact:
                     data = recv_once(sock, args.delay, args.buffer_size)
                 else:
-                    data = receive_available(sock, args.delay, args.read_timeout)
+                    data = receive_available(sock, args.delay, init_timeout)
                 print_phase("received after init", data)
 
                 sock.sendall(request)
@@ -186,7 +207,7 @@ def main() -> int:
                 if args.legacy_exact:
                     data = recv_once(sock, args.delay, args.buffer_size)
                 else:
-                    data = receive_available(sock, args.delay, args.read_timeout)
+                    data = receive_available(sock, args.delay, request_timeout)
                 print_phase("received after request", data)
 
                 sock.sendall(b"\x10")
@@ -194,7 +215,7 @@ def main() -> int:
                 if args.legacy_exact:
                     payload = recv_once(sock, args.delay, args.buffer_size)
                 else:
-                    payload = receive_available(sock, args.delay, args.read_timeout)
+                    payload = receive_available(sock, args.delay, payload_timeout)
                 print_phase("received payload", payload)
                 captured_payloads.extend(payload)
 
