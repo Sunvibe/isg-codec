@@ -7,6 +7,13 @@ import socket
 import sys
 import time
 from pathlib import Path
+from typing import NamedTuple
+
+
+class PhaseTimeouts(NamedTuple):
+    init: float
+    request: float
+    payload: float
 
 
 def parse_hex_bytes(value: str) -> bytes:
@@ -75,6 +82,48 @@ def recv_once(sock: socket.socket, wait: float, buffer_size: int) -> bytes:
         return sock.recv(buffer_size)
     except TimeoutError:
         return b""
+
+
+def effective_timeouts(args: argparse.Namespace) -> PhaseTimeouts:
+    if args.read_timeout is not None:
+        return PhaseTimeouts(args.read_timeout, args.read_timeout, args.read_timeout)
+    return PhaseTimeouts(args.init_timeout, args.request_timeout, args.payload_timeout)
+
+
+def read_phase(sock: socket.socket, args: argparse.Namespace, idle_timeout: float) -> bytes:
+    if args.legacy_exact:
+        return recv_once(sock, args.delay, args.buffer_size)
+    return receive_available(sock, args.delay, idle_timeout)
+
+
+def send_and_read(
+    sock: socket.socket,
+    args: argparse.Namespace,
+    label: str,
+    payload: bytes,
+    idle_timeout: float,
+) -> bytes:
+    sock.sendall(payload)
+    print_phase(f"sent {label}", payload)
+    data = read_phase(sock, args, idle_timeout)
+    print_phase(f"received after {label}", data)
+    return data
+
+
+def run_request_cycle(
+    sock: socket.socket,
+    args: argparse.Namespace,
+    request: bytes,
+    timeouts: PhaseTimeouts,
+) -> bytes:
+    send_and_read(sock, args, "init", b"\x02", timeouts.init)
+    send_and_read(sock, args, "request", request, timeouts.request)
+
+    sock.sendall(b"\x10")
+    print_phase("sent acknowledge", b"\x10")
+    payload = read_phase(sock, args, timeouts.payload)
+    print_phase("received payload", payload)
+    return payload
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -170,10 +219,8 @@ def main() -> int:
     args = build_parser().parse_args()
     request = build_request(args.command)
     captured_payloads = bytearray()
-    init_timeout = args.read_timeout if args.read_timeout is not None else args.init_timeout
-    request_timeout = args.read_timeout if args.read_timeout is not None else args.request_timeout
-    payload_timeout = args.read_timeout if args.read_timeout is not None else args.payload_timeout
-    socket_timeout = min(init_timeout, request_timeout, payload_timeout, 0.25)
+    timeouts = effective_timeouts(args)
+    socket_timeout = min(timeouts.init, timeouts.request, timeouts.payload, 0.25)
 
     try:
         with socket.create_connection((args.host, args.port), timeout=args.connect_timeout) as sock:
@@ -194,29 +241,7 @@ def main() -> int:
 
                 print(f"cycle {cycle}/{args.repeat}")
 
-                sock.sendall(b"\x02")
-                print_phase("sent init", b"\x02")
-                if args.legacy_exact:
-                    data = recv_once(sock, args.delay, args.buffer_size)
-                else:
-                    data = receive_available(sock, args.delay, init_timeout)
-                print_phase("received after init", data)
-
-                sock.sendall(request)
-                print_phase("sent request", request)
-                if args.legacy_exact:
-                    data = recv_once(sock, args.delay, args.buffer_size)
-                else:
-                    data = receive_available(sock, args.delay, request_timeout)
-                print_phase("received after request", data)
-
-                sock.sendall(b"\x10")
-                print_phase("sent acknowledge", b"\x10")
-                if args.legacy_exact:
-                    payload = recv_once(sock, args.delay, args.buffer_size)
-                else:
-                    payload = receive_available(sock, args.delay, payload_timeout)
-                print_phase("received payload", payload)
+                payload = run_request_cycle(sock, args, request, timeouts)
                 captured_payloads.extend(payload)
 
     except OSError as exc:

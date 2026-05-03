@@ -68,6 +68,10 @@ request: 01 00 30 0A 09 1C 10 03
 - `F3` reads domestic hot water data.
 - `0A 09 1C` reads a consumption-related value.
 
+The OpenHAB Stiebel heat pump configuration is a useful external reference for additional request bytes, channel names, positions, lengths, scales, and units:
+
+- [Tecalor_THZ55_7_62.xml](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/resources/HeatpumpConfig/Tecalor_THZ55_7_62.xml)
+
 ## Timing Observations
 
 The early protocol phases are sensitive to long idle reads. Reading too long after the init byte or request frame can delay the next protocol byte and prevent the device from returning payload data.
@@ -130,6 +134,25 @@ payload idle timeout:
 
 ```powershell
 py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 1.5 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.75 --output tests\fixtures\thz55eco-global.bin
+```
+
+## Confirmed Faster Repeat Capture
+
+This command was confirmed to work and can capture repeated global data responses faster:
+
+```powershell
+py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-repeat5.bin
+```
+
+Observed working faster timing:
+
+```text
+initial banner flush: 0.1s
+step delay after send: 0.25s
+init idle timeout: 0.05s
+request idle timeout: 0.05s
+payload idle timeout: 0.25s
+repeat count: 5
 ```
 
 ## Open Questions
