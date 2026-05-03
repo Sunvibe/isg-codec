@@ -22,10 +22,20 @@ The generic `tools/ser2net_capture.py` tool can be used to test TCP connectivity
 
 The device-specific `tools/thz55eco_capture.py` tool captures Tecalor THZ 5.5 Eco responses through ser2net. It intentionally keeps the THZ 5.5 Eco request sequence separate from the generic ser2net transport tool.
 
+The device-specific `tools/thz55eco_serialx_capture.py` tool uses `serialx` for serial transports, including ESPHome serial proxy URLs. This keeps ESPHome-specific dependencies out of the core library.
+
+The ESPHome serial proxy transport is still under investigation. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](docs/thz55eco-esphome-serial-proxy-notes.md) for the current status.
+
 Example for capturing global data:
 
 ```powershell
 py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 1.5 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.75 --output tests\fixtures\thz55eco-global.bin
+```
+
+Example for capturing global data through an ESPHome serial proxy with `serialx`:
+
+```powershell
+py tools\thz55eco_serialx_capture.py --url "esphome://192.168.64.120:6053/?port_name=THZ" --command "FB" --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-esphome.bin
 ```
 
 Known THZ 5.5 Eco commands:

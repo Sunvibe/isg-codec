@@ -14,6 +14,20 @@ ser2net port tcp,3334 device serialdev, /dev/ttyUSB0, 115200n81,local [,115200N8
 
 The banner should be read and ignored before starting the device request sequence.
 
+An ESPHome serial proxy can also expose the diagnostic serial connection. The `tools/thz55eco_serialx_capture.py` tool uses `serialx` for this transport. With a serial proxy named `THZ`, the URL shape is:
+
+```text
+esphome://192.168.64.120:6053/?port_name=THZ
+```
+
+If ESPHome API encryption is enabled, include the API key in the URL according to serialx's ESPHome support:
+
+```text
+esphome://192.168.64.120:6053/?port_name=THZ&key=...
+```
+
+See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md) for the current ESP32-S3, CP210x, ESPHome, and serialx transport status.
+
 ## Request Sequence
 
 The observed request sequence is:
@@ -142,6 +156,12 @@ This command was confirmed to work and can capture repeated global data response
 
 ```powershell
 py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-repeat5.bin
+```
+
+Equivalent ESPHome serial proxy capture using serialx:
+
+```powershell
+py tools\thz55eco_serialx_capture.py --url "esphome://192.168.64.120:6053/?port_name=THZ" --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-esphome-repeat5.bin
 ```
 
 Observed working faster timing:
