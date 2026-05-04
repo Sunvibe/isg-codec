@@ -37,13 +37,30 @@ send 02
 receive 10
 
 send 01 00 <checksum> <command...> 10 03
-receive optional request-phase bytes
+receive 10 02
 
 send 10
-receive payload
+receive payload until 10 03
 ```
 
-The final `10` byte is an acknowledge/continue byte. It is time-sensitive and should be sent promptly after the request phase.
+This is an event-driven sequence. The next phase can start as soon as the expected protocol response has been received:
+
+- `02` starts communication and should return `10`.
+- `10 02` means data is available for the request.
+- the final `10` acknowledges that the device should send the response.
+- `10 03` ends the response frame.
+
+The `tools/thz55eco_openhab_capture.py` tool follows this flow and no longer needs fixed sleeps between the phases on the happy path. Its `--byte-timeout` is only a read timeout for stalled or invalid communication, not a normal delay.
+
+The naming in the capture tools follows the OpenHAB `DataParser.java` constants where possible:
+
+- `ESCAPE`: `10`
+- `HEADER_START`: `01`
+- `END`: `03`
+- `GET`: `00`
+- `START_COMMUNICATION`: `02`
+- `FOOTER`: `10 03`
+- `DATA_AVAILABLE`: `10 02`
 
 ## Request Frame
 
@@ -58,6 +75,8 @@ The checksum is calculated as:
 ```text
 checksum = 0x01 + sum(command bytes), modulo 256
 ```
+
+This is equivalent to OpenHAB's read-response checksum calculation for request frames: sum all bytes before the footer, skip the checksum byte at position 2, and keep the low byte.
 
 Example for global data:
 
@@ -86,99 +105,59 @@ The OpenHAB Stiebel heat pump configuration is a useful external reference for a
 
 - [Tecalor_THZ55_7_62.xml](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/resources/HeatpumpConfig/Tecalor_THZ55_7_62.xml)
 
-## Timing Observations
+The OpenHAB parser implementation is a useful reference for packet constants, checksum validation, duplicated-byte escaping, and response value parsing:
 
-The early protocol phases are sensitive to long idle reads. Reading too long after the init byte or request frame can delay the next protocol byte and prevent the device from returning payload data.
+- [DataParser.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/protocol/DataParser.java)
 
-Observed working timing:
+## OpenHAB-Style Capture Tool
 
-```text
-initial banner flush: 1.5s
-step delay after send: 0.25s
-init idle timeout: 0.05s
-request idle timeout: 0.05s
-payload idle timeout: 0.75s
-```
+The `tools/thz55eco_openhab_capture.py` tool keeps the ser2net transport but follows the OpenHAB communication flow more directly:
 
-Observed problematic timing:
+- start communication with `02` and expect `10`
+- send a checksummed and duplicated-byte-escaped request message
+- wait for `10 02` (`DATA_AVAILABLE`)
+- acknowledge with `10`
+- read until `10 03`, then de-escape the response and validate the header/checksum
 
-```text
-init or request idle timeout: 0.75s to 2.0s
-```
-
-Legacy behavior from the AppDaemon bridge also works:
-
-```text
-send protocol byte/frame
-sleep 0.25s
-recv(200)
-```
-
-This suggests that the issue is not the receive buffer size itself, but the timing between protocol phases.
-
-## Suggested Tuning Ranges
-
-These are current working ranges for further experiments, not hard protocol limits.
-
-```text
-initial banner flush:
-  observed working: 1.5s
-  suggested range: 0.5s to 2.0s
-
-step delay after send:
-  observed working: 0.25s
-  suggested range: 0.20s to 0.50s
-
-init idle timeout:
-  observed working: 0.05s
-  observed problematic: 0.75s and above
-  suggested range: 0.02s to 0.10s
-
-request idle timeout:
-  observed working: 0.05s
-  observed problematic: 0.75s and above
-  suggested range: 0.02s to 0.10s
-
-payload idle timeout:
-  observed working: 0.75s
-  suggested range: 0.50s to 2.0s
-```
-
-## Current Capture Command
+Example:
 
 ```powershell
-py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 1.5 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.75 --output tests\fixtures\thz55eco-global.bin
+py tools\thz55eco_openhab_capture.py --host 192.168.64.101 --port 3334 --request "FB" --output tests\fixtures\thz55eco-global-openhab.bin
 ```
 
-## Confirmed Faster Repeat Capture
+Confirmed global-data capture:
 
-This command was confirmed to work and can capture repeated global data responses faster:
-
-```powershell
-py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-repeat5.bin
+```text
+02      -> 10
+request -> 10 02
+10      -> 83-byte response ending in 10 03
+checksum validation: ok
 ```
 
-Equivalent ESPHome serial proxy capture using serialx:
+Repeat captures on the same connection should keep the default `--repeat-delay 1.2`. This matches OpenHAB's `waitingTime` default for polling multiple requests. Local THZ 5.5 Eco tests showed:
+
+```text
+repeat-delay 1.2s: stable, matches OpenHAB default
+repeat-delay 0.6s: stable in a short test
+repeat-delay 0.3s: no longer stable
+```
+
+The tool is intentionally small and is based on these OpenHAB classes:
+
+- [CommunicationService.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/internal/CommunicationService.java)
+- [DataParser.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/protocol/DataParser.java)
+- [ProtocolConnector.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/protocol/ProtocolConnector.java)
+
+## ESPHome Serial Proxy Capture
+
+Equivalent ESPHome serial proxy capture still uses the serialx tool:
 
 ```powershell
 py tools\thz55eco_serialx_capture.py --url "esphome://192.168.64.120:6053/?port_name=THZ" --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-esphome-repeat5.bin
 ```
 
-Observed working faster timing:
-
-```text
-initial banner flush: 0.1s
-step delay after send: 0.25s
-init idle timeout: 0.05s
-request idle timeout: 0.05s
-payload idle timeout: 0.25s
-repeat count: 5
-```
+The ESPHome path has separate transport-level status and blockers. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md).
 
 ## Open Questions
 
-- Are the timing requirements caused by the heat pump, the diagnostic serial adapter, ser2net, or a combination of all three?
-- Is the request-phase response always empty for known read commands?
-- Does the payload include an internal checksum or length field that can be validated?
-- Which byte escaping rules are required before parsing payload data?
-- Are the same timings valid for all supported THZ 5.5 Eco commands?
+- Are OpenHAB's duplicated-byte escaping rules complete for all THZ 5.5 Eco payloads (`10 10` -> `10`, `2B 18` -> `2B`)?

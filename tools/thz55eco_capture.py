@@ -10,6 +10,15 @@ from pathlib import Path
 from typing import NamedTuple
 
 
+ESCAPE = 0x10
+HEADER_START = 0x01
+END = 0x03
+GET = 0x00
+START_COMMUNICATION = 0x02
+FOOTER = bytes([ESCAPE, END])
+DATA_AVAILABLE = bytes([ESCAPE, START_COMMUNICATION])
+
+
 class PhaseTimeouts(NamedTuple):
     init: float
     request: float
@@ -35,8 +44,8 @@ def format_hexdump(data: bytes, offset: int = 0) -> str:
     return "\n".join(lines)
 
 
-def calc_checksum(command: bytes) -> bytes:
-    checksum = 1
+def calculate_checksum(command: bytes) -> bytes:
+    checksum = HEADER_START + GET
     for byte in command:
         checksum = (checksum + byte) & 0xFF
     return bytes([checksum])
@@ -45,7 +54,7 @@ def calc_checksum(command: bytes) -> bytes:
 def build_request(command: bytes) -> bytes:
     if not command:
         raise ValueError("command must contain at least one byte")
-    return b"\x01\x00" + calc_checksum(command) + command + b"\x10\x03"
+    return bytes([HEADER_START, GET]) + calculate_checksum(command) + command + FOOTER
 
 
 def receive_available(sock: socket.socket, wait: float, read_timeout: float, buffer_size: int = 4096) -> bytes:
@@ -116,11 +125,11 @@ def run_request_cycle(
     request: bytes,
     timeouts: PhaseTimeouts,
 ) -> bytes:
-    send_and_read(sock, args, "init", b"\x02", timeouts.init)
+    send_and_read(sock, args, "start communication", bytes([START_COMMUNICATION]), timeouts.init)
     send_and_read(sock, args, "request", request, timeouts.request)
 
-    sock.sendall(b"\x10")
-    print_phase("sent acknowledge", b"\x10")
+    sock.sendall(bytes([ESCAPE]))
+    print_phase("sent acknowledge", bytes([ESCAPE]))
     payload = read_phase(sock, args, timeouts.payload)
     print_phase("received payload", payload)
     return payload
