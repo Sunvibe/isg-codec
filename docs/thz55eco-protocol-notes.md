@@ -1,10 +1,13 @@
 # THZ 5.5 Eco Protocol Notes
 
-These notes document current observations while capturing data from a Tecalor THZ 5.5 Eco through a ser2net TCP endpoint. They are working notes, not a final protocol specification.
+These notes document current observations while capturing data from a Tecalor THZ 5.5 Eco through either a ser2net TCP endpoint or an ESPHome serial proxy exposed through serialx. They are working notes, not a final protocol specification.
 
 ## Transport
 
-The current test setup uses ser2net to expose the diagnostic serial connection as a TCP socket.
+The project currently supports two equivalent transport paths for the same THZ request sequence:
+
+- ser2net TCP socket, handled by `tools/thz55eco_ser2net_capture.py`
+- serialx stream, including ESPHome serial proxy URLs, handled by `tools/thz55eco_serialx_capture.py`
 
 Observed ser2net banner on connect:
 
@@ -12,7 +15,7 @@ Observed ser2net banner on connect:
 ser2net port tcp,3334 device serialdev, /dev/ttyUSB0, 115200n81,local [,115200N81,CLOCAL]
 ```
 
-The banner should be read and ignored before starting the device request sequence.
+The ser2net banner should be read and ignored before starting the device request sequence.
 
 An ESPHome serial proxy can also expose the diagnostic serial connection. The `tools/thz55eco_serialx_capture.py` tool uses `serialx` for this transport. With a serial proxy named `THZ`, the URL shape is:
 
@@ -26,7 +29,7 @@ If ESPHome API encryption is enabled, include the API key in the URL according t
 esphome://192.168.64.120:6053/?port_name=THZ&key=...
 ```
 
-See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md) for the current ESP32-S3, CP210x, ESPHome, and serialx transport status.
+See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md) for the current ESP32-S3, CP210x, ESPHome, and serialx transport setup.
 
 ## Request Sequence
 
@@ -50,7 +53,7 @@ This is an event-driven sequence. The next phase can start as soon as the expect
 - the final `10` acknowledges that the device should send the response.
 - `10 03` ends the response frame.
 
-The `tools/thz55eco_openhab_capture.py` tool follows this flow and no longer needs fixed sleeps between the phases on the happy path. Its `--byte-timeout` is only a read timeout for stalled or invalid communication, not a normal delay.
+The capture tools follow this flow and no longer need fixed sleeps between the phases on the happy path. Their `--byte-timeout` option is only a read timeout for stalled or invalid communication, not a normal delay.
 
 The naming in the capture tools follows the OpenHAB `DataParser.java` constants where possible:
 
@@ -109,9 +112,9 @@ The OpenHAB parser implementation is a useful reference for packet constants, ch
 
 - [DataParser.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/protocol/DataParser.java)
 
-## OpenHAB-Style Capture Tool
+## OpenHAB-Style Capture Tools
 
-The `tools/thz55eco_openhab_capture.py` tool keeps the ser2net transport but follows the OpenHAB communication flow more directly:
+The ser2net and serialx capture tools use the same OpenHAB-style communication flow:
 
 - start communication with `02` and expect `10`
 - send a checksummed and duplicated-byte-escaped request message
@@ -119,10 +122,16 @@ The `tools/thz55eco_openhab_capture.py` tool keeps the ser2net transport but fol
 - acknowledge with `10`
 - read until `10 03`, then de-escape the response and validate the header/checksum
 
-Example:
+ser2net example:
 
 ```powershell
-py tools\thz55eco_openhab_capture.py --host 192.168.64.101 --port 3334 --request "FB" --output tests\fixtures\thz55eco-global-openhab.bin
+py tools\thz55eco_ser2net_capture.py --host 192.168.64.101 --port 3334 --request "FB" --byte-timeout 1.2 --output tests\fixtures\thz55eco-global-ser2net.bin
+```
+
+serialx / ESPHome example:
+
+```powershell
+py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --request "FB" --byte-timeout 1.2 --output tests\fixtures\thz55eco-global-esphome.bin
 ```
 
 Confirmed global-data capture:
@@ -142,10 +151,18 @@ repeat-delay 0.6s: stable in a short test
 repeat-delay 0.3s: no longer stable
 ```
 
-For testing the largest aggregate requests, use `tools/thz55eco_bulk_requests.py`. It captures the built-in aggregate request list, validates each response, and can write one response file per request:
+For testing the largest aggregate requests, use the bulk capture tools. They capture the built-in aggregate request list, validate each response, and can write one response file per request.
+
+ser2net bulk example:
 
 ```powershell
-py tools\thz55eco_bulk_requests.py --host 192.168.64.101 --port 3334 --quiet --output-dir tests\fixtures\bulk
+py tools\thz55eco_ser2net_bulk_capture.py --host 192.168.64.101 --port 3334 --quiet --output-dir tests\fixtures\bulk
+```
+
+serialx / ESPHome bulk example:
+
+```powershell
+py tools\thz55eco_serialx_bulk_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --quiet --output-dir tests\fixtures\bulk
 ```
 
 Use `--list` to show the built-in request list, or `--only FB,F4,F3` to limit a run.
@@ -168,13 +185,7 @@ The tool is intentionally small and is based on these OpenHAB classes:
 
 ## ESPHome Serial Proxy Capture
 
-Equivalent ESPHome serial proxy capture still uses the serialx tool:
-
-```powershell
-py tools\thz55eco_serialx_capture.py --url "esphome://192.168.64.120:6053/?port_name=THZ" --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-esphome-repeat5.bin
-```
-
-The ESPHome path has separate transport-level status and blockers. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md).
+The ESPHome serial proxy path is confirmed working through `serialx`. It uses the same protocol sequence as the ser2net tools; only the transport setup differs. The ESP32-S3 board requires the `USB-OTG` solder bridge to power the THZ diagnostic interface. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](thz55eco-esphome-serial-proxy-notes.md).
 
 ## Open Questions
 

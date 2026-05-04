@@ -1,4 +1,4 @@
-"""Capture THZ 5.5 Eco responses through serialx using openHAB-style protocol flow."""
+"""Capture large THZ 5.5 Eco aggregate requests through serialx."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import contextlib
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -19,17 +20,30 @@ FOOTER = bytes([ESCAPE, END])
 DATA_AVAILABLE = bytes([ESCAPE, START_COMMUNICATION])
 
 
+@dataclass(frozen=True)
+class BulkRequest:
+    key: str
+    request_bytes: bytes
+    record_count: int
+    description: str
+
+
+BULK_REQUESTS: tuple[BulkRequest, ...] = (
+    BulkRequest("FB", bytes.fromhex("FB"), 42, "global values"),
+    BulkRequest("F2", bytes.fromhex("F2"), 22, "status values"),
+    BulkRequest("F4", bytes.fromhex("F4"), 19, "heating circuit 1"),
+    BulkRequest("F3", bytes.fromhex("F3"), 10, "domestic hot water"),
+    BulkRequest("F5", bytes.fromhex("F5"), 8, "heating circuit 2"),
+    BulkRequest("FC", bytes.fromhex("FC"), 7, "time/date"),
+    BulkRequest("16", bytes.fromhex("16"), 6, "solar"),
+    BulkRequest("E8", bytes.fromhex("E8"), 6, "aggregate values"),
+    BulkRequest("09", bytes.fromhex("09"), 5, "history"),
+    BulkRequest("D1", bytes.fromhex("D1"), 5, "last errors"),
+)
+
+
 class ProtocolError(Exception):
     """Raised when the heat pump protocol exchange does not match expectations."""
-
-
-def parse_hex_bytes(value: str) -> bytes:
-    normalized = value.replace("0x", "").replace(",", " ").replace(":", " ")
-    parts = normalized.split()
-    try:
-        return bytes(int(part, 16) for part in parts)
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError(f"invalid hex byte sequence: {value}") from exc
 
 
 def format_hexdump(data: bytes, offset: int = 0) -> str:
@@ -40,6 +54,12 @@ def format_hexdump(data: bytes, offset: int = 0) -> str:
         ascii_part = "".join(chr(byte) if 32 <= byte <= 126 else "." for byte in chunk)
         lines.append(f"{offset + index:08X}  {hex_part:<47}  {ascii_part}")
     return "\n".join(lines)
+
+
+def print_phase(name: str, data: bytes) -> None:
+    print(f"{name}: {len(data)} bytes")
+    if data:
+        print(format_hexdump(data))
 
 
 def calculate_checksum(data: bytes) -> int:
@@ -94,9 +114,6 @@ def fix_duplicated_bytes(data: bytes) -> bytes:
 
 
 def create_request_message(request_bytes: bytes) -> bytes:
-    if not request_bytes:
-        raise ValueError("request bytes must contain at least one byte")
-
     message = bytearray([HEADER_START, GET, 0x00])
     message.extend(request_bytes)
     message.extend(FOOTER)
@@ -116,10 +133,11 @@ def verify_header(response: bytes) -> None:
         raise ProtocolError(f"invalid checksum: got {response[2]:02X}, expected {expected:02X}")
 
 
-def print_phase(name: str, data: bytes) -> None:
-    print(f"{name}: {len(data)} bytes")
-    if data:
-        print(format_hexdump(data))
+async def recv_exactly_one(reader: asyncio.StreamReader, timeout: float) -> int:
+    data = await asyncio.wait_for(reader.read(1), timeout=timeout)
+    if not data:
+        raise ProtocolError("connection closed while waiting for one byte")
+    return data[0]
 
 
 async def read_stale_bytes(reader: asyncio.StreamReader, timeout: float, buffer_size: int) -> bytes:
@@ -138,13 +156,6 @@ async def read_stale_bytes(reader: asyncio.StreamReader, timeout: float, buffer_
     return b"".join(chunks)
 
 
-async def recv_exactly_one(reader: asyncio.StreamReader, timeout: float) -> int:
-    data = await asyncio.wait_for(reader.read(1), timeout=timeout)
-    if not data:
-        raise ProtocolError("connection closed while waiting for one byte")
-    return data[0]
-
-
 async def start_communication(
     reader: asyncio.StreamReader,
     writer: asyncio.StreamWriter,
@@ -152,10 +163,8 @@ async def start_communication(
 ) -> None:
     writer.write(bytes([START_COMMUNICATION]))
     await writer.drain()
-    print_phase("sent start communication", bytes([START_COMMUNICATION]))
 
     response = await recv_exactly_one(reader, timeout)
-    print_phase("received start response", bytes([response]))
     if response != ESCAPE:
         raise ProtocolError("heat pump did not return ESCAPE after start communication")
 
@@ -166,11 +175,10 @@ async def establish_request(
     request_message: bytes,
     timeout: float,
     max_retry: int,
-) -> None:
-    for request_try in range(1, max_retry + 1):
+) -> bytes:
+    for _ in range(max_retry):
         writer.write(request_message)
         await writer.drain()
-        print_phase(f"sent request try {request_try}", request_message)
 
         response = bytearray()
         for _ in range(max_retry):
@@ -180,16 +188,18 @@ async def establish_request(
                 continue
 
             if bytes(response[-2:]) == DATA_AVAILABLE:
-                print_phase("received data available", bytes(response))
-                return
+                return bytes(response)
 
-        print_phase("received while waiting for data available", bytes(response))
         await start_communication(reader, writer, timeout)
 
     raise ProtocolError("heat pump did not report DATA_AVAILABLE for request")
 
 
-async def receive_data(reader: asyncio.StreamReader, timeout: float, max_retry: int) -> bytes:
+async def receive_data(
+    reader: asyncio.StreamReader,
+    timeout: float,
+    max_retry: int,
+) -> tuple[bytes, bytes]:
     response = bytearray()
     retries = 0
 
@@ -205,31 +215,45 @@ async def receive_data(reader: asyncio.StreamReader, timeout: float, max_retry: 
 
         response.extend(chunk)
         if len(response) > 4 and bytes(response[-2:]) == FOOTER:
-            print_phase("received raw response", bytes(response))
-            fixed = fix_duplicated_bytes(bytes(response))
-            print_phase("de-escaped response", fixed)
-            return fixed
+            raw = bytes(response)
+            return raw, fix_duplicated_bytes(raw)
 
     raise ProtocolError("response footer was not received")
 
 
-async def get_data(
+async def capture_request(
     reader: asyncio.StreamReader,
     writer: asyncio.StreamWriter,
-    request_message: bytes,
+    request: BulkRequest,
     args: argparse.Namespace,
-) -> bytes:
-    await establish_request(reader, writer, request_message, args.byte_timeout, args.max_retry)
+) -> tuple[bytes, bytes, bytes]:
+    request_message = create_request_message(request.request_bytes)
+    await start_communication(reader, writer, args.byte_timeout)
+    data_available = await establish_request(reader, writer, request_message, args.byte_timeout, args.max_retry)
 
     writer.write(bytes([ESCAPE]))
     await writer.drain()
-    print_phase("sent acknowledge", bytes([ESCAPE]))
-    return await receive_data(reader, args.byte_timeout, args.max_retry)
+
+    raw_response, response = await receive_data(reader, args.byte_timeout, args.max_retry)
+    verify_header(response)
+    return data_available, raw_response, response
+
+
+def selected_requests(only: str | None) -> list[BulkRequest]:
+    if not only:
+        return list(BULK_REQUESTS)
+
+    requested_keys = {part.strip().upper() for part in only.split(",") if part.strip()}
+    known = {request.key: request for request in BULK_REQUESTS}
+    unknown = sorted(requested_keys - known.keys())
+    if unknown:
+        raise ValueError(f"unknown bulk request key(s): {', '.join(unknown)}")
+    return [request for request in BULK_REQUESTS if request.key in requested_keys]
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run an openHAB-style THZ 5.5 Eco request through serialx.",
+        description="Capture large THZ 5.5 Eco aggregate requests through serialx.",
     )
     parser.add_argument(
         "--url",
@@ -243,12 +267,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="serial baud rate",
     )
     parser.add_argument(
-        "--request",
-        "--command",
-        dest="request_bytes",
-        required=True,
-        type=parse_hex_bytes,
-        help='request bytes, for example "FB", "F4", "F3", or "0A 09 1C"',
+        "--only",
+        help='comma-separated request keys to capture, for example "FB,F4,F3"',
     )
     parser.add_argument(
         "--byte-timeout",
@@ -256,11 +276,6 @@ def build_parser() -> argparse.ArgumentParser:
         default=1.2,
         help="timeout in seconds for each single-byte protocol read",
     )
-    parser.add_argument("--delay", type=float, help=argparse.SUPPRESS)
-    parser.add_argument("--read-timeout", type=float, help=argparse.SUPPRESS)
-    parser.add_argument("--init-timeout", type=float, help=argparse.SUPPRESS)
-    parser.add_argument("--request-timeout", type=float, help=argparse.SUPPRESS)
-    parser.add_argument("--payload-timeout", type=float, help=argparse.SUPPRESS)
     parser.add_argument(
         "--initial-read-timeout",
         type=float,
@@ -273,9 +288,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="skip reading stale bytes before the first request",
     )
     parser.add_argument(
-        "--init-only",
-        action="store_true",
-        help="only send the THZ init byte 02 and read the init response",
+        "--max-retry",
+        type=int,
+        default=5,
+        help="maximum retries for openHAB-style request and byte reads",
+    )
+    parser.add_argument(
+        "--repeat-delay",
+        type=float,
+        default=1.2,
+        help="delay in seconds between requests on the same connection",
     )
     parser.add_argument(
         "--buffer-size",
@@ -284,45 +306,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="maximum bytes to read while flushing stale data",
     )
     parser.add_argument(
-        "--max-retry",
-        type=int,
-        default=5,
-        help="maximum retries for openHAB-style request and byte reads",
-    )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=1,
-        help="number of request cycles to run on the same connection",
-    )
-    parser.add_argument(
-        "--repeat-delay",
-        type=float,
-        default=1.2,
-        help="delay in seconds between repeated request cycles",
-    )
-    parser.add_argument(
-        "--output",
+        "--output-dir",
         type=Path,
-        help="optional file path for writing the final de-escaped response bytes",
+        help="optional directory for writing one de-escaped .bin response per request",
     )
     parser.add_argument(
-        "--no-verify",
+        "--raw-output-dir",
+        type=Path,
+        help="optional directory for writing one raw .bin response per request",
+    )
+    parser.add_argument(
+        "--quiet",
         action="store_true",
-        help="skip response header and checksum validation",
+        help="print one summary line per request instead of response hexdumps",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="list built-in bulk requests and exit",
     )
     return parser
 
 
 async def async_main() -> int:
     args = build_parser().parse_args()
-    if args.read_timeout is not None:
-        args.byte_timeout = args.read_timeout
-    elif args.init_timeout is not None and args.init_only:
-        args.byte_timeout = args.init_timeout
 
-    request_message = create_request_message(args.request_bytes)
-    captured_responses = bytearray()
+    try:
+        requests = selected_requests(args.only)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+
+    if args.list:
+        for request in BULK_REQUESTS:
+            print(f"{request.key:>2}  records={request.record_count:<2}  {request.description}")
+        return 0
+
+    if args.output_dir:
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+    if args.raw_output_dir:
+        args.raw_output_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         import serialx
@@ -345,44 +368,61 @@ async def async_main() -> int:
         print(f"connection failed: {exc}", file=sys.stderr)
         return 1
 
-    print(f"connected to {args.url}")
-    print_phase("request bytes", args.request_bytes)
-    print_phase("request message", request_message)
+    failures = 0
 
     try:
         with contextlib.closing(writer):
+            print(f"connected to {args.url}")
+
             if args.no_initial_flush:
                 print("initial data before first request: skipped")
             else:
                 initial_data = await read_stale_bytes(reader, args.initial_read_timeout, args.buffer_size)
                 print_phase("initial data before first request", initial_data)
 
-            if args.init_only:
-                await start_communication(reader, writer, args.byte_timeout)
-                print("init-only mode: skipped request and acknowledge phases")
-            else:
-                for cycle in range(1, args.repeat + 1):
-                    if cycle > 1:
-                        await asyncio.sleep(args.repeat_delay)
+            for index, request in enumerate(requests, start=1):
+                if index > 1:
+                    await asyncio.sleep(args.repeat_delay)
 
-                    print(f"cycle {cycle}/{args.repeat}")
-                    await start_communication(reader, writer, args.byte_timeout)
-                    response = await get_data(reader, writer, request_message, args)
-                    if not args.no_verify:
-                        verify_header(response)
-                        print("response verification: ok")
-                    captured_responses.extend(response)
-    except (OSError, ProtocolError, TimeoutError) as exc:
+                print(
+                    f"request {index}/{len(requests)}: {request.key} "
+                    f"({request.description}, {request.record_count} records)"
+                )
+
+                try:
+                    data_available, raw_response, response = await capture_request(reader, writer, request, args)
+                except (OSError, ProtocolError, TimeoutError) as exc:
+                    failures += 1
+                    print(f"  failed: {exc}", file=sys.stderr)
+                    continue
+
+                escaped_delta = len(raw_response) - len(response)
+                print(
+                    f"  ok: data_available={data_available.hex(' ').upper()} "
+                    f"raw={len(raw_response)} bytes de_escaped={len(response)} bytes "
+                    f"escaped_delta={escaped_delta}"
+                )
+
+                if args.output_dir:
+                    output_path = args.output_dir / f"thz55eco-{request.key.lower()}.bin"
+                    output_path.write_bytes(response)
+                    print(f"  wrote {output_path}")
+                if args.raw_output_dir:
+                    raw_output_path = args.raw_output_dir / f"thz55eco-{request.key.lower()}-raw.bin"
+                    raw_output_path.write_bytes(raw_response)
+                    print(f"  wrote {raw_output_path}")
+                if not args.quiet:
+                    print_phase("  response", response)
+
+    except (OSError, TimeoutError) as exc:
         print(f"communication failed: {exc}", file=sys.stderr)
         return 1
 
-    print(f"captured {len(captured_responses)} de-escaped response bytes")
+    if failures:
+        print(f"completed with {failures} failed request(s)", file=sys.stderr)
+        return 1
 
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_bytes(captured_responses)
-        print(f"wrote {args.output}")
-
+    print(f"completed {len(requests)} request(s)")
     return 0
 
 

@@ -16,38 +16,76 @@ The core library should stay focused and avoid dependencies that are only needed
 
 ## Protocol Discovery Tools
 
-Supporting new devices may require separate test and decoding tools. These tools can have their own dependencies, such as connectivity through the currently available ser2net setup and, in the future, optional ESPHome-based access.
+Supporting new devices may require separate test and decoding tools. These tools can have their own dependencies, such as connectivity through ser2net or optional ESPHome-based access through `serialx`.
 
-The generic `tools/ser2net_capture.py` tool can be used to test TCP connectivity and capture raw bytes from any ser2net endpoint.
+The current THZ 5.5 Eco tooling has two equivalent access paths:
 
-The device-specific `tools/thz55eco_capture.py` tool captures Tecalor THZ 5.5 Eco responses through ser2net. It intentionally keeps the THZ 5.5 Eco request sequence separate from the generic ser2net transport tool.
+- `tools/thz55eco_ser2net_capture.py` uses a ser2net TCP endpoint.
+- `tools/thz55eco_serialx_capture.py` uses `serialx`, including ESPHome serial proxy URLs.
 
-The device-specific `tools/thz55eco_serialx_capture.py` tool uses `serialx` for serial transports, including ESPHome serial proxy URLs. This keeps ESPHome-specific dependencies out of the core library.
+Both tools implement the same optimized openHAB-style protocol sequence:
 
-The ESPHome serial proxy transport is still under investigation. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](docs/thz55eco-esphome-serial-proxy-notes.md) for the current status.
+- send `02` and expect `10`
+- send an escaped and checksummed request frame
+- wait for `10 02` (`DATA_AVAILABLE`)
+- acknowledge with `10`
+- read until `10 03`
+- de-escape and validate the response checksum
 
-Example for capturing global data:
+This sequence avoids fixed phase sleeps on the happy path and uses `--byte-timeout` only for stalled or invalid communication.
+
+Example for capturing global data through ser2net:
 
 ```powershell
-py tools\thz55eco_capture.py --host 192.168.64.101 --port 3334 --command "FB" --initial-read-timeout 1.5 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.75 --output tests\fixtures\thz55eco-global.bin
+py tools\thz55eco_ser2net_capture.py --host 192.168.64.101 --port 3334 --command "FB" --byte-timeout 1.2 --output tests\fixtures\thz55eco-global-ser2net.bin
 ```
 
 Example for capturing global data through an ESPHome serial proxy with `serialx`:
 
 ```powershell
-py tools\thz55eco_serialx_capture.py --url "esphome://192.168.64.120:6053/?port_name=THZ" --command "FB" --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --repeat 5 --output tests\fixtures\thz55eco-global-esphome.bin
+py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --command "FB" --byte-timeout 1.2 --output tests\fixtures\thz55eco-global-esphome.bin
 ```
 
-Known THZ 5.5 Eco commands:
+The ESPHome serial proxy transport is confirmed working with an ESP32-S3 N16R8 dual USB-C board after closing the board's `USB-OTG` solder bridge so the THZ diagnostic interface receives VBUS/5 V. See [THZ 5.5 Eco ESPHome Serial Proxy Notes](docs/thz55eco-esphome-serial-proxy-notes.md).
+
+## Bulk Reads And Decoding
+
+The bulk capture tools run a built-in list of aggregate requests based on the project's observed THZ 5.5 Eco data point descriptions:
+
+- `tools/thz55eco_ser2net_bulk_capture.py` captures through ser2net.
+- `tools/thz55eco_serialx_bulk_capture.py` captures through `serialx` and ESPHome serial proxy URLs.
+
+Both tools support `--list`, `--only`, `--output-dir`, `--raw-output-dir`, and `--quiet`.
+
+Example bulk capture through ser2net:
+
+```powershell
+py tools\thz55eco_ser2net_bulk_capture.py --host 192.168.64.101 --port 3334 --quiet --output-dir tests\fixtures\bulk
+```
+
+Example bulk capture through ESPHome serial proxy:
+
+```powershell
+py tools\thz55eco_serialx_bulk_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --quiet --output-dir tests\fixtures\bulk
+```
+
+Captured aggregate responses can be decoded with the small data point decoder:
+
+```powershell
+py tools\thz55eco_decode_bulk.py --input-dir tests\fixtures\bulk --csv tests\fixtures\bulk-decoded.csv
+```
+
+The decoder uses `docs/reference/thz55eco_observed_bulk_points.json`. It currently implements the value parsing needed for the observed captures: signed big-endian 1/2/4-byte values, optional bit extraction, and record scaling.
+
+Important THZ 5.5 Eco aggregate requests include:
 
 - `FB` reads global data.
+- `F2` reads status values.
 - `F4` reads heating circuit 1 data.
 - `F3` reads domestic hot water data.
-- `0A 09 1C` reads a consumption-related value.
-
-The early protocol phases are time-sensitive. The tool therefore uses separate phase timeouts: short init and request timeouts before sending the next protocol byte, and a longer payload timeout after the acknowledge byte.
-
-The `--legacy-exact` mode is still available for comparison with the AppDaemon bridge this project was initially inspired by: after each protocol step, the tool sleeps once and then performs exactly one socket read with the configured buffer size.
+- `F5` reads heating circuit 2 data.
+- `FC` reads time/date data.
+- `16`, `E8`, `09`, and `D1` read additional aggregate groups.
 
 See [THZ 5.5 Eco Protocol Notes](docs/thz55eco-protocol-notes.md) for the current request sequence, timing observations, and tuning ranges.
 

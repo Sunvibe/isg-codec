@@ -1,0 +1,72 @@
+[14:38:03.790][I][app:154]: ESPHome version 2026.4.3 compiled on 2026-05-04 14:33:32 +0200
+[14:38:03.790][I][app:161]: ESP32 Chip: ESP32-S3 rev0.2, 2 core(s)
+[14:38:03.790][C][logger:219]: Logger:
+[14:38:03.790][C][logger:219]:   Max Level: DEBUG
+[14:38:03.790][C][logger:219]:   Initial Level: DEBUG
+[14:38:03.790][C][logger:226]:   Log Baud Rate: 115200
+[14:38:03.790][C][logger:226]:   Hardware UART: UART0
+[14:38:03.797][C][logger:235]:   Task Log Buffer Size: 768 bytes
+[14:38:03.817][C][usb_host:554]: USBClient
+[14:38:03.817][C][usb_host:554]:   Vendor id 10C4
+[14:38:03.817][C][usb_host:554]:   Product id EA60
+[14:38:03.841][C][usb_uart:260]:   UART Channel 0
+[14:38:03.841][C][usb_uart:260]:     Baud Rate: 115200 baud
+[14:38:03.841][C][usb_uart:260]:     Data Bits: 8
+[14:38:03.841][C][usb_uart:260]:     Parity: NONE
+[14:38:03.841][C][usb_uart:260]:     Stop bits: 1
+[14:38:03.841][C][usb_uart:260]:     Flush Timeout: 100 ms
+[14:38:03.841][C][usb_uart:260]:     Debug: NO
+[14:38:03.841][C][usb_uart:260]:     Dummy receiver: NO
+[14:38:03.841][C][captive_portal:134]: Captive Portal:
+[14:38:03.841][C][wifi:1505]: WiFi:
+[14:38:03.841][C][wifi:1505]:   Local MAC: 44:1B:F6:D4:45:84
+[14:38:03.841][C][wifi:1505]:   Connected: YES
+[14:38:03.851][C][wifi:1216]:   IP Address: 192.168.64.39
+[14:38:03.851][C][wifi:1227]:   SSID: [redacted]
+[14:38:03.851][C][wifi:1227]:   BSSID: [redacted]
+[14:38:03.851][C][wifi:1227]:   Hostname: 'fmnet-heatpump-serial-bridge'
+[14:38:03.851][C][wifi:1227]:   Signal strength: -35 dB ▂▄▆█
+[14:38:03.851][C][wifi:1227]:   Channel: 11
+[14:38:03.851][C][wifi:1227]:   Subnet: 255.255.255.0
+[14:38:03.851][C][wifi:1227]:   Gateway: 192.168.64.1
+[14:38:03.851][C][wifi:1227]:   DNS1: 192.168.64.1
+[14:38:03.851][C][wifi:1227]:   DNS2: 0.0.0.0
+[14:38:03.851][C][esphome.ota:071]: Over-The-Air updates:
+[14:38:03.851][C][esphome.ota:071]:   Address: fmnet-heatpump-serial-bridge.local:3232
+[14:38:03.851][C][esphome.ota:071]:   Version: 2
+[14:38:03.851][C][esphome.ota:078]:   Password configured
+[14:38:03.875][C][safe_mode:026]: Safe Mode:
+[14:38:03.875][C][safe_mode:026]:   Successful after: 60s
+[14:38:03.875][C][safe_mode:026]:   Invoke after: 10 attempts
+[14:38:03.875][C][safe_mode:026]:   Duration: 300s
+[14:38:03.899][C][safe_mode:043]:   Bootloader rollback: supported
+[14:38:03.899][C][web_server.ota:256]: Web Server OTA
+[14:38:03.899][C][api:235]: Server:
+[14:38:03.899][C][api:235]:   Address: fmnet-heatpump-serial-bridge.local:6053
+[14:38:03.899][C][api:235]:   Listen backlog: 4
+[14:38:03.899][C][api:235]:   Max connections: 8
+[14:38:03.910][C][api:242]:   Noise encryption: YES
+[14:38:03.955][C][mdns:194]: mDNS:
+[14:38:03.955][C][mdns:194]:   Hostname: fmnet-heatpump-serial-bridge
+[14:38:03.955][C][serial_proxy:078]: Serial Proxy [0]:
+[14:38:03.955][C][serial_proxy:078]:   Name: THZ
+[14:38:03.955][C][serial_proxy:078]:   Port Type: TTL
+[14:38:03.955][C][serial_proxy:078]:   RTS Pin: not configured
+[14:38:03.955][C][serial_proxy:078]:   DTR Pin: not configured
+[14:38:39.295][E][usb_uart:298][usb_task]: Input transfer failed, status=ERROR
+[14:38:39.302][D][usb_host:185][usb_task]: Device gone
+[14:38:39.312][D][usb_host:026]: Event flags 2X
+[14:38:46.893][D][usb_host:288]: Open device 2
+[14:38:46.894][D][usb_host:295]: Get descriptor device 2
+[14:38:46.897][D][usb_host:303]: Device descriptor: vid 10C4 pid EA60
+[14:38:46.901][D][usb_host:322]: Device connected: Manuf: Silicon Labs; Prod: CP2102 USB to UART Bridge Controller; Serial: 0001
+[14:38:46.912][D][usb_uart:060]: bDeviceClass: 0, bDeviceSubClass: 0, bNumInterfaces: 1
+[14:38:46.912][D][usb_uart:411]: Found 1 CDC-ACM devices
+[14:38:46.915][D][usb_uart:114]: Line control value 0x800
+[14:38:46.916][D][usb_host:179][usb_task]: New device 2
+[14:38:58.859][I][safe_mode:091]: Boot seems successful; resetting boot loop counter
+[14:39:02.081][D][preferences:152]: Writing 1 items: 0 cached, 1 written, 0 failed
+[14:39:32.560][D][api:220]: Accept 192.168.64.117
+[14:39:33.152][D][api.connection:2409]: aioesphomeapi (192.168.64.117): connected
+[14:39:33.164][D][serial_proxy:094]: Configuring serial proxy [0]: baud=115200, flow_ctrl=NO, parity=0, stop=1, data=8
+[14:39:33.382][D][api.connection:2409]: aioesphomeapi (192.168.64.117): disconnected

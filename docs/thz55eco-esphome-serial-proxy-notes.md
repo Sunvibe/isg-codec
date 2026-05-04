@@ -1,21 +1,38 @@
 # THZ 5.5 Eco ESPHome Serial Proxy Notes
 
-These notes document the current ESPHome and serialx approach for accessing a Tecalor THZ 5.5 Eco through an ESP32-S3 with a CP210x USB-to-UART adapter attached to the ESP32-S3 USB-OTG host port.
+These notes document the current ESPHome and serialx approach for accessing a Tecalor THZ 5.5 Eco through an ESP32-S3 USB-OTG host port and the THZ diagnostic interface's CP2102 USB-to-UART bridge.
 
-This is not yet a confirmed working transport. The ser2net transport is currently confirmed working; the ESPHome serial proxy transport is still under investigation.
+The ESPHome serial proxy transport is confirmed working with the hardware and configuration notes below.
 
 ## Intended Setup
 
 The intended hardware path is:
 
 ```text
-THZ diagnostic serial port
-  -> CP210x USB-to-UART adapter
+THZ diagnostic USB interface
+  -> internal CP2102 USB-to-UART bridge
   -> ESP32-S3 USB-OTG host
   -> ESPHome usb_uart
   -> ESPHome serial_proxy
   -> serialx esphome:// client
 ```
+
+## ESP32-S3 Board Hardware Requirement
+
+The ESP32-S3 N16R8 dual USB-C board must have its `USB-OTG` solder bridge closed for this setup. Without this bridge, the left USB-C OTG connector does not supply VBUS/5 V to the THZ 5.5 Eco diagnostic USB interface.
+
+Observed behavior without the `USB-OTG` bridge:
+
+- A USB power meter connected to the ESP32-S3 OTG port does not turn on.
+- Plugging and unplugging the THZ diagnostic interface produces no USB host events in ESPHome, even with `logger.level: VERBOSE`.
+- Writes through `serial_proxy` fail with `usb_uart: Channel not initialised - write ignored`.
+
+Observed behavior after closing the `USB-OTG` bridge:
+
+- The USB power meter turns on when connected to the ESP32-S3 OTG port.
+- ESPHome logs USB activity when the THZ diagnostic interface is connected.
+
+A reference ESPHome log from a working serial proxy connection is stored in `docs/reference/thz55eco-esphome-working-serial-proxy-log.txt`.
 
 The intended client URL shape is:
 
@@ -30,17 +47,26 @@ The `port_name` value comes from the ESPHome `serial_proxy` name.
 Current ESPHome configuration shape:
 
 ```yaml
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+usb_host:
+  enable_hubs: false
+  max_transfer_requests: 32
+
 usb_uart:
   - type: cp210x
+    vid: 0x10C4
+    pid: 0xEA60
     channels:
       - id: uch_1
         baud_rate: 115200
         data_bits: 8
         parity: NONE
         stop_bits: 1
-        buffer_size: 2048
-        debug: true
-        dummy_receiver: true
+        buffer_size: 1024
+        dummy_receiver: false
 
 serial_proxy:
   - id: thz_serial_proxy
@@ -52,10 +78,12 @@ serial_proxy:
 Important details:
 
 - `type: cp210x` matches the observed USB device.
+- `vid: 0x10C4` and `pid: 0xEA60` match the THZ diagnostic interface's CP2102 bridge.
 - `baud_rate: 115200`, `data_bits: 8`, `parity: NONE`, and `stop_bits: 1` match the confirmed ser2net setup (`115200n81`).
 - `name: THZ` is used as `port_name=THZ` in the serialx URL.
-- `debug: true` was enabled for diagnostics.
-- `dummy_receiver: true` was tested, but did not resolve the current blocker.
+- `hardware_uart: UART0` keeps ESPHome logging off the ESP32-S3 USB_SERIAL_JTAG peripheral while USB-OTG host is in use.
+- `dummy_receiver: false` keeps received bytes available for `serial_proxy`.
+- `debug: true` and `logger.level: VERBOSE` are useful for short-term diagnostics, but should be disabled for normal operation.
 
 ## serialx Dependency
 
@@ -74,21 +102,21 @@ No handler registered for URI scheme 'esphome://'
 ## Current Capture Command
 
 ```powershell
-py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --command "FB" --initial-read-timeout 0.1 --delay 0.25 --init-timeout 0.05 --request-timeout 0.05 --payload-timeout 0.25 --output tests\fixtures\thz55eco-global-esphome-fast.bin
+py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --command "FB" --byte-timeout 1.2 --output tests\fixtures\thz55eco-global-esphome.bin
 ```
 
 Minimal init-only transport check:
 
 ```powershell
-py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --command "FB" --init-only --initial-read-timeout 0.1 --delay 0.25 --init-timeout 1.0
+py tools\thz55eco_serialx_capture.py --url "esphome://fmnet-heatpump-serial-bridge:6053/?port_name=THZ&key=..." --command "FB" --init-only --byte-timeout 1.2
 ```
 
 For a working transport, the init-only check should produce:
 
 ```text
-sent init: 1 bytes
+sent start communication: 1 bytes
 00000000  02                                               .
-received after init: 1 bytes
+received start response: 1 bytes
 00000000  10                                               .
 ```
 
@@ -99,6 +127,7 @@ ESPHome detects the CP210x USB-to-UART adapter:
 ```text
 Vendor id 10C4
 Product id EA60
+Device connected: Manuf: Silicon Labs; Prod: CP2102 USB to UART Bridge Controller
 ```
 
 ESPHome reports the USB UART channel as:
@@ -108,8 +137,8 @@ Baud Rate: 115200 baud
 Data Bits: 8
 Parity: NONE
 Stop bits: 1
-Debug: YES
-Dummy receiver: YES
+Debug: NO
+Dummy receiver: NO
 ```
 
 The serial proxy is exposed as:
@@ -127,53 +156,52 @@ api.connection: aioesphomeapi: connected
 serial_proxy: Configuring serial proxy [0]: baud=115200, flow_ctrl=NO, parity=0, stop=1, data=8
 ```
 
-## Current Blocker
+## Resolved Blocker
 
-Writes through the ESPHome serial proxy are currently ignored by ESPHome:
+Writes through the ESPHome serial proxy were initially ignored by ESPHome:
 
 ```text
 usb_uart: Channel not initialised - write ignored
 ```
 
-This happens when the Python tool sends the initial THZ byte:
+This happened when the Python tool sent the initial THZ byte:
 
 ```text
-sent init: 1 bytes
+sent start communication: 1 bytes
 00000000  02                                               .
-received after init: 0 bytes
 ```
 
-Interpretation:
+Root causes and fixes:
 
-- The ESPHome API connection works.
-- The serial proxy is found and configured.
-- The CP210x adapter is detected.
-- The UART settings appear correct.
-- The write does not reach the CP210x channel because ESPHome considers the USB UART channel not initialized.
+- The ESP32-S3 board's `USB-OTG` solder bridge was initially open, so the THZ diagnostic interface was not powered from the OTG port.
+- The THZ diagnostic interface must be unplugged and replugged after ESPHome changes or reboot if no fresh USB host events are logged.
+- The working setup uses `type: cp210x`, `vid: 0x10C4`, `pid: 0xEA60`, `dummy_receiver: false`, and logger output on `UART0`.
 
-This means the current failure is below the THZ request protocol. The THZ command, checksum, and acknowledge sequence are not yet being tested over this transport because the init byte is ignored before it reaches the device.
+With the USB-OTG bridge closed and the CP2102 re-enumerated, serialx receives data through ESPHome `serial_proxy`.
 
 ## Tested Changes
 
 - Changed `stop_bits` from the initially observed `1.5` to `1`.
-- Enabled `debug: true`.
-- Enabled `dummy_receiver: true`.
+- Tested `debug: true` for diagnostics, then disabled it for normal operation.
+- Tested `dummy_receiver: true`, then disabled it so `serial_proxy` receives incoming bytes.
+- Set `dummy_receiver: false` for normal serial proxy operation.
+- Moved ESPHome logging to `hardware_uart: UART0`.
+- Closed the ESP32-S3 board's `USB-OTG` solder bridge to provide VBUS/5 V to the THZ diagnostic interface.
 - Confirmed that serialx connects to ESPHome and configures the serial proxy.
-- Confirmed that writes still produce `Channel not initialised - write ignored`.
+- Confirmed that serialx receives data through the ESPHome serial proxy.
 
 ## Next Diagnostics
 
-Recommended next step: test whether ESPHome can write to the `usb_uart` channel internally, without `serial_proxy` or serialx. The exact diagnostic mechanism should be chosen in the ESPHome configuration or component code that fits the test setup.
+If the issue returns, first verify that ESPHome logs a fresh USB device connection after the THZ diagnostic interface is plugged into the OTG port.
 
 Expected outcomes:
 
-- If this also logs `Channel not initialised - write ignored`, the issue is in ESPHome `usb_uart`, USB host setup, CP210x lifecycle, or hardware.
-- If this writes successfully, but `serial_proxy` still fails, the issue is likely the interaction between `serial_proxy` and `usb_uart`.
+- If there are no USB host events, check the `USB-OTG` solder bridge, VBUS/5 V, the OTG adapter, and the cable.
+- If USB enumeration succeeds but writes log `Channel not initialised - write ignored`, replug the THZ diagnostic interface after boot and confirm `type: cp210x`, `vid`, and `pid`.
+- If USB writes succeed but serialx receives no payload, compare the exchange between `tools/thz55eco_ser2net_capture.py` and `tools/thz55eco_serialx_capture.py`.
 
-## Open Questions
+## Remaining Notes
 
-- Does ESPHome `usb_uart` require a different lifecycle trigger before the channel becomes initialized?
-- Does `serial_proxy` currently support `usb_uart` channels reliably, or only hardware UARTs?
-- Is there a known ESPHome issue for `serial_proxy` combined with `usb_uart` and CP210x?
-- Does the CP210x need to be replugged after boot, or does it initialize only after a USB host event?
-- Would an ESPHome-native UART write/read test succeed without `serial_proxy`?
+- The THZ diagnostic interface may need to be replugged after ESPHome changes or reboot if no fresh USB host event appears.
+- Keep `logger.level` at `DEBUG` or lower during normal operation; `VERBOSE` is only for short-term USB diagnostics.
+- Keep `usb_uart.debug` disabled during normal operation unless byte-level USB UART diagnostics are needed.
