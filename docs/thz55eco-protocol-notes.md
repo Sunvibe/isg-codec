@@ -142,6 +142,24 @@ repeat-delay 0.6s: stable in a short test
 repeat-delay 0.3s: no longer stable
 ```
 
+For testing the largest aggregate requests, use `tools/thz55eco_bulk_requests.py`. It captures the built-in aggregate request list, validates each response, and can write one response file per request:
+
+```powershell
+py tools\thz55eco_bulk_requests.py --host 192.168.64.101 --port 3334 --quiet --output-dir tests\fixtures\bulk
+```
+
+Use `--list` to show the built-in request list, or `--only FB,F4,F3` to limit a run.
+
+Captured aggregate responses can be decoded with `tools/thz55eco_decode_bulk.py` and this project's observed point mapping:
+
+```powershell
+py tools\thz55eco_decode_bulk.py --input-dir tests\fixtures\bulk --csv tests\fixtures\bulk-decoded.csv
+```
+
+The decoder does not vendor the OpenHAB XML configuration. Its mapping lives in `docs/reference/thz55eco_observed_bulk_points.json` and is maintained by this project from local captures and protocol interpretation. OpenHAB remains a comparison reference for protocol behavior and value parsing.
+
+The decoder follows the same value parsing rules that were validated against `DataParser.java`: signed big-endian 1/2/4-byte values, optional bit extraction, and record scaling.
+
 The tool is intentionally small and is based on these OpenHAB classes:
 
 - [CommunicationService.java](https://github.com/rhuitl/openhab-addons/blob/cd3c9cd223e9d4922cf7732f10210ef8e7d208c7/bundles/org.openhab.binding.stiebelheatpump/src/main/java/org/openhab/binding/stiebelheatpump/internal/CommunicationService.java)

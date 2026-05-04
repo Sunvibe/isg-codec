@@ -1,0 +1,131 @@
+request,key,position,length,bit_position,raw,value,unit
+09,history_compressor_heating,4,2,,15 A7,5543,
+09,history_compressor_cooling,6,2,,00 00,0,
+09,history_compressor_domestic_hot_water,8,2,,03 BB,955,
+09,history_booster_domestic_hot_water,10,2,,00 1A,26,
+09,history_booster_heating,12,2,,00 00,0,
+16,solar_collector_temp,4,2,,FD A8,-60.0,degC
+16,solar_domestic_hot_water_temp,6,2,,01 CD,46.1,degC
+16,solar_flow_temp,8,2,,01 2F,30.3,degC
+16,solar_pump_duty,10,1,,00,0,
+16,solar_output_state,15,2,,00 08,8,
+16,solar_status,17,1,,27,39,
+D1,last_errors_number_of_faults,4,1,,00,0,
+D1,last_errors_fault0_code,6,1,,00,0,
+D1,last_errors_fault1_code,12,1,,00,0,
+D1,last_errors_fault2_code,18,1,,00,0,
+D1,last_errors_fault3_code,24,1,,00,0,
+E8,fan_input_fan_speed,31,1,,00,0,
+E8,fan_output_fan_speed,32,1,,00,0,
+E8,fan_stage_airflow_inlet,33,2,,00 00,0,
+E8,fan_stage_airflow_outlet,35,2,,00 00,0,
+E8,fan_input_fan_power,37,1,,00,0,
+E8,fan_output_fan_power,38,1,,00,0,
+F2,control_heat_request,4,1,,05,5,
+F2,control_heat_request2,5,1,,05,5,
+F2,control_heating_circuit_stage,6,1,,00,0,
+F2,control_domestic_hot_water_stage,7,1,,00,0,
+F2,control_heat_stage_control_modul,8,1,,00,0,
+F2,control_comp_block_time,9,2,,00 00,0,
+F2,control_pasteurisation_mode,11,1,,00,0,
+F2,control_defrost_evaporator,12,1,,00,0,
+F2,control_booster_stage2,13,1,,00,0,
+F2,control_solar_pump,13,1,1,00,False,
+F2,control_booster_stage1,13,1,2,00,False,
+F2,control_compressor,13,1,3,00,False,
+F2,control_heat_pipe_valve,13,1,4,00,False,
+F2,control_diverter_valve,13,1,5,00,False,
+F2,control_domestic_hot_water_pump,13,1,6,00,False,
+F2,control_heating_circuit_pump,13,1,7,00,False,
+F2,control_mixer_open,14,1,6,08,False,
+F2,control_mixer_closed,14,1,7,08,False,
+F2,control_sensor_bits1,15,1,,00,0,
+F2,control_sensor_bits2,16,1,,01,1,
+F2,control_boost_block_time_after_pump_start,17,2,,00 00,0,
+F2,control_boost_block_time_after_high_pressure,19,2,,00 00,0,
+F3,domestic_hot_water_temp,4,2,,01 CD,46.1,degC
+F3,domestic_hot_water_outside_temp,6,2,,00 E2,22.6,degC
+F3,domestic_hot_water_set_temp,8,2,,01 D6,47.0,degC
+F3,domestic_hot_water_comp_block_time,10,2,,00 00,0,
+F3,domestic_hot_water_output_state,12,2,,00 08,8,
+F3,domestic_hot_water_heat_block_time,14,2,,00 00,0,
+F3,domestic_hot_water_booster_stage,16,1,,00,0,
+F3,domestic_hot_water_pasteurisation_mode,18,1,,00,0,
+F3,domestic_hot_water_op_mode,19,1,,01,1,
+F3,domestic_hot_water_unknown_x36,20,2,,88 44,-30652,
+F4,heating_circuit_1_outside_temp,4,2,,00 E2,22.6,degC
+F4,heating_circuit_1_unknown_x08,6,2,,00 00,0.0,
+F4,heating_circuit_1_return_temp,8,2,,01 2A,29.8,degC
+F4,heating_circuit_1_integral_heat,10,2,,00 00,0,
+F4,heating_circuit_1_flow_temp,12,2,,01 2C,30.0,degC
+F4,heating_circuit_1_heat_set_temp,14,2,,01 43,32.3,degC
+F4,heating_circuit_1_heat_temp,16,2,,01 2A,29.8,degC
+F4,heating_circuit_1_season_mode,21,1,,02,2,
+F4,heating_circuit_1_integral_switch,24,2,,00 64,100,
+F4,heating_circuit_1_heating_circuit_op_mode,26,1,,01,1,
+F4,heating_circuit_1_room_set_temp,30,2,,00 FA,25.0,degC
+F4,heating_circuit_1_unknown_x60,32,2,,00 00,0.0,
+F4,heating_circuit_1_unknown_x64,34,2,,00 00,0.0,
+F4,heating_circuit_1_inside_temp_remote_control,36,2,,00 FA,25.0,degC
+F4,heating_circuit_1_unknown_x72,38,2,,02 00,51.2,
+F4,heating_circuit_1_unknown_x76,40,2,,00 00,0.0,
+F4,heating_circuit_1_on_hysteresis_no,18,1,,00,0,
+F4,heating_circuit_1_off_hysteresis_no,19,1,,00,0,
+F4,heating_circuit_1_heating_circuit_booster_stage,20,1,,00,0,
+F5,heating_circuit_2_outside_temp,4,2,,00 E2,22.6,degC
+F5,heating_circuit_2_return_temp,6,2,,01 2A,29.8,degC
+F5,heating_circuit_2_flow_temp,8,2,,80 01,-3276.7,degC
+F5,heating_circuit_2_heat_set_temp,10,2,,01 30,30.4,degC
+F5,heating_circuit_2_heat_temp,12,2,,01 2A,29.8,degC
+F5,heating_circuit_2_actuator_position,14,2,,00 00,0.0,
+F5,heating_circuit_2_season_mode,17,1,,02,2,
+F5,heating_circuit_2_heating_circuit_op_mode,20,1,,01,1,
+FB,global_outside_temp,6,2,,00 E2,22.6,degC
+FB,global_flow_temp,8,2,,01 2B,29.9,degC
+FB,global_return_temp,10,2,,01 26,29.4,degC
+FB,global_hot_gas_temp,12,2,,01 2E,30.2,degC
+FB,global_domestic_hot_water_temp,14,2,,01 CE,46.2,degC
+FB,global_flow_temp_heating_circuit2,16,2,,80 01,-3276.7,degC
+FB,global_evaporator_temp,20,2,,01 1E,28.6,degC
+FB,global_condenser_temp,22,2,,01 14,27.6,degC
+FB,global_mixer_open,24,1,7,00,False,
+FB,global_mixer_closed,24,1,6,00,False,
+FB,global_heat_pipe_valve,24,1,5,00,False,
+FB,global_diverter_valve,24,1,4,00,False,
+FB,global_domestic_hot_water_pump,24,1,3,00,False,
+FB,global_heating_circuit_pump,24,1,2,00,False,
+FB,global_solar_pump,24,1,,00,0,
+FB,global_compressor,25,1,4,08,True,
+FB,global_booster_stage3,25,1,3,08,False,
+FB,global_booster_stage2,25,1,2,08,False,
+FB,global_booster_stage1,25,1,1,08,False,
+FB,global_high_pressure_sensor_inverted,26,1,7,27,True,
+FB,global_low_pressure_sensor_inverted,26,1,6,27,True,
+FB,global_evaporator_ice_monitor,26,1,5,27,True,
+FB,global_signal_anode,26,1,4,27,False,
+FB,global_utility_release,26,1,3,27,False,
+FB,global_oven_fireplace,26,1,2,27,True,
+FB,global_safety_temperature_limiter,26,1,1,27,False,
+FB,global_output_ventilator_power,27,2,,00 00,0.0,
+FB,global_input_ventilator_power,29,2,,00 00,0.0,
+FB,global_main_ventilator_power,31,2,,00 00,0.0,
+FB,global_output_ventilator_speed,33,2,,00 00,0,
+FB,global_input_ventilator_speed,35,2,,00 00,0,
+FB,global_main_ventilator_speed,37,2,,00 00,0,
+FB,global_outside_temp_filtered,39,2,,00 B3,17.9,degC
+FB,global_rel_humidity,41,2,,00 00,0.0,
+FB,global_dew_point,43,2,,00 00,0.0,
+FB,global_pressure_low_side,45,2,,05 B1,14.57,bar
+FB,global_pressure_high_side,47,2,,06 BA,17.22,bar
+FB,global_collector_temp,4,2,,FD A8,-60.0,degC
+FB,global_inside_temp,18,2,,FD A8,-60.0,degC
+FB,global_window_open,25,1,5,08,False,
+FB,global_quick_air_vent,26,1,,27,39,
+FB,global_flow_rate,57,2,,00 00,0.0,
+FC,time_date_weekday,4,1,,00,0,
+FC,time_date_hour,5,1,,0B,11,
+FC,time_date_min,6,1,,17,23,
+FC,time_date_sec,7,1,,0E,14,
+FC,time_date_year,8,1,,1A,26,
+FC,time_date_month,9,1,,05,5,
+FC,time_date_day,10,1,,04,4,

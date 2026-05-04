@@ -1,0 +1,1106 @@
+﻿{
+    "schema":  "isg-codec.thz55eco.observed-points.v1",
+    "note":  "Project-owned mapping for locally observed Tecalor THZ 5.5 Eco aggregate responses. The mapping is maintained in this project and is not a vendored OpenHAB XML configuration.",
+    "requests":  [
+                     {
+                         "request":  "09",
+                         "label":  "history",
+                         "points":  [
+                                        {
+                                            "key":  "history_compressor_heating",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "history_compressor_cooling",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "history_compressor_domestic_hot_water",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "history_booster_domestic_hot_water",
+                                            "offset":  10,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "history_booster_heating",
+                                            "offset":  12,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "16",
+                         "label":  "solar",
+                         "points":  [
+                                        {
+                                            "key":  "solar_collector_temp",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "solar_domestic_hot_water_temp",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "solar_flow_temp",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "solar_pump_duty",
+                                            "offset":  10,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "solar_output_state",
+                                            "offset":  15,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "solar_status",
+                                            "offset":  17,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "D1",
+                         "label":  "last_errors",
+                         "points":  [
+                                        {
+                                            "key":  "last_errors_number_of_faults",
+                                            "offset":  4,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "last_errors_fault0_code",
+                                            "offset":  6,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "last_errors_fault1_code",
+                                            "offset":  12,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "last_errors_fault2_code",
+                                            "offset":  18,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "last_errors_fault3_code",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "E8",
+                         "label":  "fan",
+                         "points":  [
+                                        {
+                                            "key":  "fan_input_fan_speed",
+                                            "offset":  31,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "fan_output_fan_speed",
+                                            "offset":  32,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "fan_stage_airflow_inlet",
+                                            "offset":  33,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "fan_stage_airflow_outlet",
+                                            "offset":  35,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "fan_input_fan_power",
+                                            "offset":  37,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "fan_output_fan_power",
+                                            "offset":  38,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "F2",
+                         "label":  "control",
+                         "points":  [
+                                        {
+                                            "key":  "control_heat_request",
+                                            "offset":  4,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_heat_request2",
+                                            "offset":  5,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_heating_circuit_stage",
+                                            "offset":  6,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_domestic_hot_water_stage",
+                                            "offset":  7,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_heat_stage_control_modul",
+                                            "offset":  8,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_comp_block_time",
+                                            "offset":  9,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_pasteurisation_mode",
+                                            "offset":  11,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_defrost_evaporator",
+                                            "offset":  12,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_booster_stage2",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_solar_pump",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  1,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_booster_stage1",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  2,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_compressor",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  3,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_heat_pipe_valve",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  4,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_diverter_valve",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  5,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_domestic_hot_water_pump",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  6,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_heating_circuit_pump",
+                                            "offset":  13,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  7,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_mixer_open",
+                                            "offset":  14,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  6,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_mixer_closed",
+                                            "offset":  14,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  7,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_sensor_bits1",
+                                            "offset":  15,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_sensor_bits2",
+                                            "offset":  16,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_boost_block_time_after_pump_start",
+                                            "offset":  17,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "control_boost_block_time_after_high_pressure",
+                                            "offset":  19,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "F3",
+                         "label":  "domestic_hot_water",
+                         "points":  [
+                                        {
+                                            "key":  "domestic_hot_water_temp",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_outside_temp",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_set_temp",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_comp_block_time",
+                                            "offset":  10,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_output_state",
+                                            "offset":  12,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_heat_block_time",
+                                            "offset":  14,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_booster_stage",
+                                            "offset":  16,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_pasteurisation_mode",
+                                            "offset":  18,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_op_mode",
+                                            "offset":  19,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "domestic_hot_water_unknown_x36",
+                                            "offset":  20,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "F4",
+                         "label":  "heating_circuit_1",
+                         "points":  [
+                                        {
+                                            "key":  "heating_circuit_1_outside_temp",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_unknown_x08",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_return_temp",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_integral_heat",
+                                            "offset":  10,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_flow_temp",
+                                            "offset":  12,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_heat_set_temp",
+                                            "offset":  14,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_heat_temp",
+                                            "offset":  16,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_season_mode",
+                                            "offset":  21,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_integral_switch",
+                                            "offset":  24,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_heating_circuit_op_mode",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_room_set_temp",
+                                            "offset":  30,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_unknown_x60",
+                                            "offset":  32,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_unknown_x64",
+                                            "offset":  34,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_inside_temp_remote_control",
+                                            "offset":  36,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_unknown_x72",
+                                            "offset":  38,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_unknown_x76",
+                                            "offset":  40,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_on_hysteresis_no",
+                                            "offset":  18,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_off_hysteresis_no",
+                                            "offset":  19,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_1_heating_circuit_booster_stage",
+                                            "offset":  20,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "F5",
+                         "label":  "heating_circuit_2",
+                         "points":  [
+                                        {
+                                            "key":  "heating_circuit_2_outside_temp",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_return_temp",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_flow_temp",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_heat_set_temp",
+                                            "offset":  10,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_heat_temp",
+                                            "offset":  12,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_actuator_position",
+                                            "offset":  14,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_season_mode",
+                                            "offset":  17,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "heating_circuit_2_heating_circuit_op_mode",
+                                            "offset":  20,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "FB",
+                         "label":  "global",
+                         "points":  [
+                                        {
+                                            "key":  "global_outside_temp",
+                                            "offset":  6,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_flow_temp",
+                                            "offset":  8,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_return_temp",
+                                            "offset":  10,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_hot_gas_temp",
+                                            "offset":  12,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_domestic_hot_water_temp",
+                                            "offset":  14,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_flow_temp_heating_circuit2",
+                                            "offset":  16,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_evaporator_temp",
+                                            "offset":  20,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_condenser_temp",
+                                            "offset":  22,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_mixer_open",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  7,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_mixer_closed",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  6,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_heat_pipe_valve",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  5,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_diverter_valve",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  4,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_domestic_hot_water_pump",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  3,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_heating_circuit_pump",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  2,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_solar_pump",
+                                            "offset":  24,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_compressor",
+                                            "offset":  25,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  4,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_booster_stage3",
+                                            "offset":  25,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  3,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_booster_stage2",
+                                            "offset":  25,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  2,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_booster_stage1",
+                                            "offset":  25,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  1,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_high_pressure_sensor_inverted",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  7,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_low_pressure_sensor_inverted",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  6,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_evaporator_ice_monitor",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  5,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_signal_anode",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  4,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_utility_release",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  3,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_oven_fireplace",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  2,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_safety_temperature_limiter",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  1,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_output_ventilator_power",
+                                            "offset":  27,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_input_ventilator_power",
+                                            "offset":  29,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_main_ventilator_power",
+                                            "offset":  31,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_output_ventilator_speed",
+                                            "offset":  33,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_input_ventilator_speed",
+                                            "offset":  35,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_main_ventilator_speed",
+                                            "offset":  37,
+                                            "size":  2,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_outside_temp_filtered",
+                                            "offset":  39,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_rel_humidity",
+                                            "offset":  41,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_dew_point",
+                                            "offset":  43,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_pressure_low_side",
+                                            "offset":  45,
+                                            "size":  2,
+                                            "scale":  0.01,
+                                            "bit":  null,
+                                            "unit":  "bar"
+                                        },
+                                        {
+                                            "key":  "global_pressure_high_side",
+                                            "offset":  47,
+                                            "size":  2,
+                                            "scale":  0.01,
+                                            "bit":  null,
+                                            "unit":  "bar"
+                                        },
+                                        {
+                                            "key":  "global_collector_temp",
+                                            "offset":  4,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_inside_temp",
+                                            "offset":  18,
+                                            "size":  2,
+                                            "scale":  0.1,
+                                            "bit":  null,
+                                            "unit":  "degC"
+                                        },
+                                        {
+                                            "key":  "global_window_open",
+                                            "offset":  25,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  5,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_quick_air_vent",
+                                            "offset":  26,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "global_flow_rate",
+                                            "offset":  57,
+                                            "size":  2,
+                                            "scale":  0.01,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     },
+                     {
+                         "request":  "FC",
+                         "label":  "time_date",
+                         "points":  [
+                                        {
+                                            "key":  "time_date_weekday",
+                                            "offset":  4,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_hour",
+                                            "offset":  5,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_min",
+                                            "offset":  6,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_sec",
+                                            "offset":  7,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_year",
+                                            "offset":  8,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_month",
+                                            "offset":  9,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        },
+                                        {
+                                            "key":  "time_date_day",
+                                            "offset":  10,
+                                            "size":  1,
+                                            "scale":  1,
+                                            "bit":  null,
+                                            "unit":  ""
+                                        }
+                                    ]
+                     }
+                 ]
+}
