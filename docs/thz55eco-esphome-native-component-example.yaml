@@ -1,0 +1,119 @@
+substitutions:
+  name: fmnet-heatpump-native
+  friendly_name: THZ 5.5 Eco
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [thz55eco]
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+
+ota:
+  platform: esphome
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+usb_host:
+  enable_hubs: false
+  max_transfer_requests: 32
+
+usb_uart:
+  - type: cp210x
+    vid: 0x10C4
+    pid: 0xEA60
+    channels:
+      - id: thz_uart
+        baud_rate: 115200
+        data_bits: 8
+        parity: NONE
+        stop_bits: 1
+        buffer_size: 1024
+        dummy_receiver: false
+
+thz55eco:
+  id: thz
+  uart_id: thz_uart
+  update_interval: 60s
+  byte_timeout: 1200ms
+  initial_flush_timeout: 200ms
+  startup_delay: 10s
+  max_retry: 5
+
+sensor:
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_outside_temp
+    name: Outside Temperature
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_flow_temp
+    name: Flow Temperature
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_return_temp
+    name: Return Temperature
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_domestic_hot_water_temp
+    name: Domestic Hot Water Temperature
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_pressure_high_side
+    name: High Side Pressure
+    unit_of_measurement: bar
+    device_class: pressure
+    state_class: measurement
+    accuracy_decimals: 2
+
+binary_sensor:
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_compressor
+    name: Compressor
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_heating_circuit_pump
+    name: Heating Circuit Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_domestic_hot_water_pump
+    name: Domestic Hot Water Pump

@@ -89,6 +89,18 @@ Important THZ 5.5 Eco aggregate requests include:
 
 See [THZ 5.5 Eco Protocol Notes](docs/thz55eco-protocol-notes.md) for the current request sequence, timing observations, and tuning ranges.
 
+## ESPHome Native THZ 5.5 Eco Component
+
+The repository also contains an ESPHome external component in `components/thz55eco` for reading the THZ 5.5 Eco directly on an ESP32-S3 and exposing selected values to Home Assistant through the ESPHome native API. The native component has been verified with the `FB` global aggregate request through the ESP32-S3 USB-OTG and CP2102 diagnostic interface path.
+
+Start from [THZ 5.5 Eco ESPHome Native Component Notes](docs/thz55eco-esphome-native-component-notes.md) and [the example ESPHome YAML](docs/thz55eco-esphome-native-component-example.yaml).
+
+The generated C++ point table is built from `docs/reference/thz55eco_observed_bulk_points.json`:
+
+```powershell
+py tools\generate_thz55eco_esphome_points.py
+```
+
 ## Repository Structure
 
 - `src/isg_codec/` contains the core library code that should remain suitable for PyPI distribution.
