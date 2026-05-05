@@ -54,13 +54,458 @@ thz55eco:
   byte_timeout: 1200ms
   initial_flush_timeout: 200ms
   startup_delay: 10s
+  request_delay: 1200ms
   max_retry: 5
 
 sensor:
   - platform: thz55eco
     thz55eco_id: thz
+    key: history_compressor_heating
+    name: History Compressor Heating
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: history_compressor_cooling
+    name: History Compressor Cooling
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: history_compressor_domestic_hot_water
+    name: History Compressor Domestic Hot Water
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: history_booster_domestic_hot_water
+    name: History Booster Domestic Hot Water
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: history_booster_heating
+    name: History Booster Heating
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_collector_temp
+    name: Solar Collector Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_domestic_hot_water_temp
+    name: Solar Domestic Hot Water Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_flow_temp
+    name: Solar Flow Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_pump_duty
+    name: Solar Pump Duty
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_output_state
+    name: Solar Output State
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: solar_status
+    name: Solar Status
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: last_errors_number_of_faults
+    name: Last Errors Number Of Faults
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: last_errors_fault0_code
+    name: Last Errors Fault0 Code
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: last_errors_fault1_code
+    name: Last Errors Fault1 Code
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: last_errors_fault2_code
+    name: Last Errors Fault2 Code
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: last_errors_fault3_code
+    name: Last Errors Fault3 Code
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_input_fan_speed
+    name: Fan Input Fan Speed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_output_fan_speed
+    name: Fan Output Fan Speed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_stage_airflow_inlet
+    name: Fan Stage Airflow Inlet
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_stage_airflow_outlet
+    name: Fan Stage Airflow Outlet
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_input_fan_power
+    name: Fan Input Fan Power
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: fan_output_fan_power
+    name: Fan Output Fan Power
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heat_request
+    name: Control Heat Request
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heat_request2
+    name: Control Heat Request2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heating_circuit_stage
+    name: Control Heating Circuit Stage
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_domestic_hot_water_stage
+    name: Control Domestic Hot Water Stage
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heat_stage_control_modul
+    name: Control Heat Stage Control Modul
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_comp_block_time
+    name: Control Comp Block Time
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_pasteurisation_mode
+    name: Control Pasteurisation Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_defrost_evaporator
+    name: Control Defrost Evaporator
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_booster_stage2
+    name: Control Booster Stage2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_sensor_bits1
+    name: Control Sensor Bits1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_sensor_bits2
+    name: Control Sensor Bits2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_boost_block_time_after_pump_start
+    name: Control Boost Block Time After Pump Start
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_boost_block_time_after_high_pressure
+    name: Control Boost Block Time After High Pressure
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_temp
+    name: Domestic Hot Water Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_outside_temp
+    name: Domestic Hot Water Outside Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_set_temp
+    name: Domestic Hot Water Set Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_comp_block_time
+    name: Domestic Hot Water Comp Block Time
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_output_state
+    name: Domestic Hot Water Output State
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_heat_block_time
+    name: Domestic Hot Water Heat Block Time
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_booster_stage
+    name: Domestic Hot Water Booster Stage
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_pasteurisation_mode
+    name: Domestic Hot Water Pasteurisation Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_op_mode
+    name: Domestic Hot Water Op Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: domestic_hot_water_unknown_x36
+    name: Domestic Hot Water Unknown X36
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_outside_temp
+    name: Heating Circuit 1 Outside Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_unknown_x08
+    name: Heating Circuit 1 Unknown X08
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_return_temp
+    name: Heating Circuit 1 Return Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_integral_heat
+    name: Heating Circuit 1 Integral Heat
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_flow_temp
+    name: Heating Circuit 1 Flow Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_heat_set_temp
+    name: Heating Circuit 1 Heat Set Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_heat_temp
+    name: Heating Circuit 1 Heat Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_season_mode
+    name: Heating Circuit 1 Season Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_integral_switch
+    name: Heating Circuit 1 Integral Switch
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_heating_circuit_op_mode
+    name: Heating Circuit 1 Heating Circuit Op Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_room_set_temp
+    name: Heating Circuit 1 Room Set Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_unknown_x60
+    name: Heating Circuit 1 Unknown X60
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_unknown_x64
+    name: Heating Circuit 1 Unknown X64
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_inside_temp_remote_control
+    name: Heating Circuit 1 Inside Temp Remote Control
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_unknown_x72
+    name: Heating Circuit 1 Unknown X72
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_unknown_x76
+    name: Heating Circuit 1 Unknown X76
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_on_hysteresis_no
+    name: Heating Circuit 1 On Hysteresis No
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_off_hysteresis_no
+    name: Heating Circuit 1 Off Hysteresis No
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_1_heating_circuit_booster_stage
+    name: Heating Circuit 1 Heating Circuit Booster Stage
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_outside_temp
+    name: Heating Circuit 2 Outside Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_return_temp
+    name: Heating Circuit 2 Return Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_flow_temp
+    name: Heating Circuit 2 Flow Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_heat_set_temp
+    name: Heating Circuit 2 Heat Set Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_heat_temp
+    name: Heating Circuit 2 Heat Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_actuator_position
+    name: Heating Circuit 2 Actuator Position
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_season_mode
+    name: Heating Circuit 2 Season Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_circuit_2_heating_circuit_op_mode
+    name: Heating Circuit 2 Heating Circuit Op Mode
+
+  - platform: thz55eco
+    thz55eco_id: thz
     key: global_outside_temp
-    name: Outside Temperature
+    name: Global Outside Temp
     unit_of_measurement: degC
     device_class: temperature
     state_class: measurement
@@ -69,7 +514,7 @@ sensor:
   - platform: thz55eco
     thz55eco_id: thz
     key: global_flow_temp
-    name: Flow Temperature
+    name: Global Flow Temp
     unit_of_measurement: degC
     device_class: temperature
     state_class: measurement
@@ -78,7 +523,16 @@ sensor:
   - platform: thz55eco
     thz55eco_id: thz
     key: global_return_temp
-    name: Return Temperature
+    name: Global Return Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_hot_gas_temp
+    name: Global Hot Gas Temp
     unit_of_measurement: degC
     device_class: temperature
     state_class: measurement
@@ -87,7 +541,7 @@ sensor:
   - platform: thz55eco
     thz55eco_id: thz
     key: global_domestic_hot_water_temp
-    name: Domestic Hot Water Temperature
+    name: Global Domestic Hot Water Temp
     unit_of_measurement: degC
     device_class: temperature
     state_class: measurement
@@ -95,25 +549,408 @@ sensor:
 
   - platform: thz55eco
     thz55eco_id: thz
-    key: global_pressure_high_side
-    name: High Side Pressure
+    key: global_flow_temp_heating_circuit2
+    name: Global Flow Temp Heating Circuit2
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_evaporator_temp
+    name: Global Evaporator Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_condenser_temp
+    name: Global Condenser Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_solar_pump
+    name: Global Solar Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_output_ventilator_power
+    name: Global Output Ventilator Power
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_input_ventilator_power
+    name: Global Input Ventilator Power
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_main_ventilator_power
+    name: Global Main Ventilator Power
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_output_ventilator_speed
+    name: Global Output Ventilator Speed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_input_ventilator_speed
+    name: Global Input Ventilator Speed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_main_ventilator_speed
+    name: Global Main Ventilator Speed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_outside_temp_filtered
+    name: Global Outside Temp Filtered
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_rel_humidity
+    name: Global Rel Humidity
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_dew_point
+    name: Global Dew Point
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_pressure_low_side
+    name: Global Pressure Low Side
     unit_of_measurement: bar
     device_class: pressure
     state_class: measurement
     accuracy_decimals: 2
 
-binary_sensor:
   - platform: thz55eco
     thz55eco_id: thz
-    key: global_compressor
-    name: Compressor
+    key: global_pressure_high_side
+    name: Global Pressure High Side
+    unit_of_measurement: bar
+    device_class: pressure
+    state_class: measurement
+    accuracy_decimals: 2
 
   - platform: thz55eco
     thz55eco_id: thz
-    key: global_heating_circuit_pump
-    name: Heating Circuit Pump
+    key: global_collector_temp
+    name: Global Collector Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_inside_temp
+    name: Global Inside Temp
+    unit_of_measurement: degC
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_quick_air_vent
+    name: Global Quick Air Vent
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_flow_rate
+    name: Global Flow Rate
+    state_class: measurement
+    accuracy_decimals: 2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_weekday
+    name: Time Date Weekday
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_hour
+    name: Time Date Hour
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_min
+    name: Time Date Min
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_sec
+    name: Time Date Sec
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_year
+    name: Time Date Year
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_month
+    name: Time Date Month
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: time_date_day
+    name: Time Date Day
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_domestic_hot_water_day
+    name: Heat Domestic Hot Water Day
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_domestic_hot_water_total
+    name: Heat Domestic Hot Water Total
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 0
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_heating_circuit_day
+    name: Heat Heating Circuit Day
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_heating_circuit_total
+    name: Heat Heating Circuit Total
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 0
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_recovered_day
+    name: Heat Recovered Day
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heat_recovered_total
+    name: Heat Recovered Total
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 0
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: heating_relative_power
+    name: Heating Relative Power
+    unit_of_measurement: "%"
+    state_class: measurement
+    accuracy_decimals: 0
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: electrical_domestic_hot_water_day
+    name: Electrical Domestic Hot Water Day
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: electrical_domestic_hot_water_total
+    name: Electrical Domestic Hot Water Total
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: electrical_heating_circuit_day
+    name: Electrical Heating Circuit Day
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: electrical_heating_circuit_total
+    name: Electrical Heating Circuit Total
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 3
+
+binary_sensor:
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_solar_pump
+    name: Control Solar Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_booster_stage1
+    name: Control Booster Stage1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_compressor
+    name: Control Compressor
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heat_pipe_valve
+    name: Control Heat Pipe Valve
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_diverter_valve
+    name: Control Diverter Valve
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_domestic_hot_water_pump
+    name: Control Domestic Hot Water Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_heating_circuit_pump
+    name: Control Heating Circuit Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_mixer_open
+    name: Control Mixer Open
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: control_mixer_closed
+    name: Control Mixer Closed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_mixer_open
+    name: Global Mixer Open
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_mixer_closed
+    name: Global Mixer Closed
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_heat_pipe_valve
+    name: Global Heat Pipe Valve
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_diverter_valve
+    name: Global Diverter Valve
 
   - platform: thz55eco
     thz55eco_id: thz
     key: global_domestic_hot_water_pump
-    name: Domestic Hot Water Pump
+    name: Global Domestic Hot Water Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_heating_circuit_pump
+    name: Global Heating Circuit Pump
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_compressor
+    name: Global Compressor
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_booster_stage3
+    name: Global Booster Stage3
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_booster_stage2
+    name: Global Booster Stage2
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_booster_stage1
+    name: Global Booster Stage1
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_high_pressure_sensor_inverted
+    name: Global High Pressure Sensor Inverted
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_low_pressure_sensor_inverted
+    name: Global Low Pressure Sensor Inverted
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_evaporator_ice_monitor
+    name: Global Evaporator Ice Monitor
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_signal_anode
+    name: Global Signal Anode
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_utility_release
+    name: Global Utility Release
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_oven_fireplace
+    name: Global Oven Fireplace
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_safety_temperature_limiter
+    name: Global Safety Temperature Limiter
+
+  - platform: thz55eco
+    thz55eco_id: thz
+    key: global_window_open
+    name: Global Window Open

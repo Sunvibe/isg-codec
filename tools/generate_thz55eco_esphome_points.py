@@ -9,11 +9,54 @@ from pathlib import Path
 
 DEFAULT_POINTS_JSON = Path("docs/reference/thz55eco_observed_bulk_points.json")
 DEFAULT_OUTPUT = Path("components/thz55eco/thz55eco_points.h")
-REQUEST_ORDER = ("FB", "F2", "F4", "F3", "F5", "FC", "16", "E8", "09", "D1")
+REQUEST_ORDER = (
+    "FB",
+    "F2",
+    "F4",
+    "F3",
+    "F5",
+    "FC",
+    "16",
+    "E8",
+    "09",
+    "D1",
+    "0A091A",
+    "0A091B",
+    "0A091C",
+    "0A091D",
+    "0A091E",
+    "0A091F",
+    "0A0920",
+    "0A0921",
+    "0A092A",
+    "0A092B",
+    "0A092C",
+    "0A092D",
+    "0A092E",
+    "0A092F",
+    "0A0930",
+    "0A0931",
+    "0A03AE",
+    "0A03AF",
+    "0A03B0",
+    "0A03B1",
+    "0A069A",
+)
 
 
-def hex_byte(value: str) -> int:
-    return int(value.replace("0x", "").strip(), 16)
+def parse_hex_bytes(value: str) -> tuple[int, ...]:
+    compact = value.replace("0x", "").replace(" ", "").strip()
+    if len(compact) % 2 != 0:
+        raise ValueError(f"invalid hex byte sequence: {value}")
+    return tuple(int(compact[index : index + 2], 16) for index in range(0, len(compact), 2))
+
+
+def request_id(request: tuple[int, ...]) -> str:
+    return "".join(f"{byte:02X}" for byte in request)
+
+
+def cpp_identifier(prefix: str, request: tuple[int, ...]) -> str:
+    return f"{prefix}_{request_id(request).lower()}"
 
 
 def format_float(value: object) -> str:
@@ -29,14 +72,14 @@ def generate(points_json: Path) -> str:
     requests_by_key = {}
     points = []
     for request in data["requests"]:
-        request_byte = hex_byte(request["request"])
-        requests_by_key[request["request"].upper()] = (request_byte, request["label"])
+        request_bytes = parse_hex_bytes(request["request"])
+        requests_by_key[request_id(request_bytes)] = (request_bytes, request["label"])
         for point in request["points"]:
             bit = point.get("bit")
             points.append(
                 {
                     "key": point["key"],
-                    "request": request_byte,
+                    "request": request_bytes,
                     "offset": int(point["offset"]),
                     "size": int(point["size"]),
                     "scale": format_float(point["scale"]),
@@ -55,11 +98,22 @@ def generate(points_json: Path) -> str:
         "namespace esphome {",
         "namespace thz55eco {",
         "",
-        "static constexpr BulkRequestDefinition THZ55ECO_BULK_REQUESTS[] = {",
     ]
 
-    for request_byte, label in requests:
-        lines.append(f'    {{0x{request_byte:02X}, "{label}"}},')
+    for request_bytes, _ in requests:
+        values = ", ".join(f"0x{byte:02X}" for byte in request_bytes)
+        lines.append(f"static constexpr uint8_t {cpp_identifier('REQUEST', request_bytes)}[] = {{{values}}};")
+
+    lines.extend(
+        [
+            "",
+            "static constexpr BulkRequestDefinition THZ55ECO_BULK_REQUESTS[] = {",
+        ]
+    )
+
+    for request_bytes, label in requests:
+        identifier = cpp_identifier("REQUEST", request_bytes)
+        lines.append(f'    {{{identifier}, sizeof({identifier}), "{label}"}},')
 
     lines.extend(
         [
@@ -70,9 +124,10 @@ def generate(points_json: Path) -> str:
     )
 
     for point in points:
+        identifier = cpp_identifier("REQUEST", point["request"])
         lines.append(
             "    "
-            f'{{"{point["key"]}", 0x{point["request"]:02X}, '
+            f'{{"{point["key"]}", {identifier}, sizeof({identifier}), '
             f'{point["offset"]}, {point["size"]}, {point["scale"]}, {point["bit"]}}},'
         )
 

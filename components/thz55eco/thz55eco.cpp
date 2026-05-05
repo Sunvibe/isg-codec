@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cstring>
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
@@ -21,9 +22,58 @@ static constexpr uint8_t GET = 0x00;
 static constexpr uint8_t SET = 0x80;
 static constexpr uint8_t START_COMMUNICATION = 0x02;
 
+static constexpr CompositePartValue COMPOSITE_PARTS_INITIAL[] = {
+    {"electrical_domestic_hot_water_day_low_part", 0, false},
+    {"electrical_domestic_hot_water_day_high_part", 0, false},
+    {"electrical_domestic_hot_water_total_low_part", 0, false},
+    {"electrical_domestic_hot_water_total_high_part", 0, false},
+    {"electrical_heating_circuit_day_low_part", 0, false},
+    {"electrical_heating_circuit_day_high_part", 0, false},
+    {"electrical_heating_circuit_total_low_part", 0, false},
+    {"electrical_heating_circuit_total_high_part", 0, false},
+    {"heat_domestic_hot_water_day_low_part", 0, false},
+    {"heat_domestic_hot_water_day_high_part", 0, false},
+    {"heat_domestic_hot_water_total_low_part", 0, false},
+    {"heat_domestic_hot_water_total_high_part", 0, false},
+    {"heat_heating_circuit_day_low_part", 0, false},
+    {"heat_heating_circuit_day_high_part", 0, false},
+    {"heat_heating_circuit_total_low_part", 0, false},
+    {"heat_heating_circuit_total_high_part", 0, false},
+    {"heat_recovered_day_low_part", 0, false},
+    {"heat_recovered_day_high_part", 0, false},
+    {"heat_recovered_total_low_part", 0, false},
+    {"heat_recovered_total_high_part", 0, false},
+};
+
+static constexpr CompositeValueDefinition COMPOSITE_VALUES[] = {
+    {"electrical_domestic_hot_water_day", "electrical_domestic_hot_water_day_low_part",
+     "electrical_domestic_hot_water_day_high_part", 0.001f, 1.0f, false},
+    {"electrical_domestic_hot_water_total", "electrical_domestic_hot_water_total_low_part",
+     "electrical_domestic_hot_water_total_high_part", 1.0f, 1000.0f, false},
+    {"electrical_heating_circuit_day", "electrical_heating_circuit_day_low_part",
+     "electrical_heating_circuit_day_high_part", 0.001f, 1.0f, false},
+    {"electrical_heating_circuit_total", "electrical_heating_circuit_total_low_part",
+     "electrical_heating_circuit_total_high_part", 1.0f, 1000.0f, false},
+    {"heat_domestic_hot_water_day", "heat_domestic_hot_water_day_low_part", "heat_domestic_hot_water_day_high_part",
+     0.001f, 1.0f, false},
+    {"heat_domestic_hot_water_total", "heat_domestic_hot_water_total_low_part",
+     "heat_domestic_hot_water_total_high_part", 1.0f, 1000.0f, false},
+    {"heat_heating_circuit_day", "heat_heating_circuit_day_low_part", "heat_heating_circuit_day_high_part", 0.001f,
+     1.0f, false},
+    {"heat_heating_circuit_total", "heat_heating_circuit_total_low_part", "heat_heating_circuit_total_high_part",
+     1.0f, 1000.0f, false},
+    {"heat_recovered_day", "heat_recovered_day_low_part", "heat_recovered_day_high_part", 0.001f, 1.0f, false},
+    {"heat_recovered_total", "heat_recovered_total_low_part", "heat_recovered_total_high_part", 1.0f, 1000.0f,
+     false},
+};
+
 void Thz55EcoComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up THZ 5.5 Eco component");
   this->setup_time_ms_ = millis();
+  this->composite_parts_.assign(COMPOSITE_PARTS_INITIAL,
+                                COMPOSITE_PARTS_INITIAL + sizeof(COMPOSITE_PARTS_INITIAL) /
+                                                              sizeof(COMPOSITE_PARTS_INITIAL[0]));
+  this->composite_values_.assign(COMPOSITE_VALUES, COMPOSITE_VALUES + sizeof(COMPOSITE_VALUES) / sizeof(COMPOSITE_VALUES[0]));
 
   if (this->parent_ != nullptr) {
     auto *channel = static_cast<usb_uart::USBUartChannel *>(this->parent_);
@@ -40,6 +90,7 @@ void Thz55EcoComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "  Byte timeout: %" PRIu32 " ms", this->byte_timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Initial flush timeout: %" PRIu32 " ms", this->initial_flush_timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Startup delay: %" PRIu32 " ms", this->startup_delay_ms_);
+  ESP_LOGCONFIG(TAG, "  Request delay: %" PRIu32 " ms", this->request_delay_ms_);
   ESP_LOGCONFIG(TAG, "  Max retry: %u", this->max_retry_);
   ESP_LOGCONFIG(TAG, "  USB UART RX callback: %s", YESNO(this->using_rx_callback_));
   ESP_LOGCONFIG(TAG, "  Numeric sensors: %u", static_cast<unsigned>(this->numeric_sensors_.size()));
@@ -82,18 +133,24 @@ void Thz55EcoComponent::loop() {
 void Thz55EcoComponent::begin_cycle_() {
   this->cycle_started_ = true;
   this->request_index_ = 0;
+  for (auto &part : this->composite_parts_) {
+    part.value = 0;
+    part.has_value = false;
+  }
+  this->composite_values_.assign(COMPOSITE_VALUES, COMPOSITE_VALUES + sizeof(COMPOSITE_VALUES) / sizeof(COMPOSITE_VALUES[0]));
   this->start_next_request_();
 }
 
 void Thz55EcoComponent::start_next_request_() {
   while (this->request_index_ < sizeof(THZ55ECO_BULK_REQUESTS) / sizeof(THZ55ECO_BULK_REQUESTS[0])) {
     const auto &request = THZ55ECO_BULK_REQUESTS[this->request_index_++];
-    if (!this->request_has_registered_point_(request.request))
+    if (!this->request_has_registered_point_(request.request, request.request_size))
       continue;
 
     this->current_request_ = request.request;
+    this->current_request_size_ = request.request_size;
     this->current_label_ = request.label;
-    this->current_request_message_ = this->create_request_message_(request.request);
+    this->current_request_message_ = this->create_request_message_(request.request, request.request_size);
     this->attempt_ = 0;
     this->previous_byte_ = 0;
     this->response_buffer_.clear();
@@ -103,6 +160,16 @@ void Thz55EcoComponent::start_next_request_() {
 
   this->cycle_started_ = false;
   this->state_ = ProtocolState::IDLE;
+}
+
+void Thz55EcoComponent::wait_before_next_request_() {
+  if (this->request_index_ >= sizeof(THZ55ECO_BULK_REQUESTS) / sizeof(THZ55ECO_BULK_REQUESTS[0])) {
+    this->start_next_request_();
+    return;
+  }
+  this->state_ = ProtocolState::WAIT_REQUEST_DELAY;
+  this->state_started_ms_ = millis();
+  this->enable_loop();
 }
 
 void Thz55EcoComponent::send_start_communication_() {
@@ -146,6 +213,10 @@ void Thz55EcoComponent::process_byte_(uint8_t byte) {
       ESP_LOGV(TAG, "Dropping stale byte 0x%02X", byte);
       return;
 
+    case ProtocolState::WAIT_REQUEST_DELAY:
+      ESP_LOGV(TAG, "Dropping byte 0x%02X during request delay", byte);
+      return;
+
     case ProtocolState::WAIT_START_ACK:
       if (byte != ESCAPE) {
         ESP_LOGW(TAG, "Start communication returned 0x%02X instead of 0x10", byte);
@@ -184,6 +255,11 @@ void Thz55EcoComponent::process_byte_(uint8_t byte) {
 void Thz55EcoComponent::handle_timeout_() {
   if (this->state_ == ProtocolState::IDLE)
     return;
+  if (this->state_ == ProtocolState::WAIT_REQUEST_DELAY) {
+    if (millis() - this->state_started_ms_ >= this->request_delay_ms_)
+      this->start_next_request_();
+    return;
+  }
   if (millis() - this->state_started_ms_ < this->byte_timeout_ms_)
     return;
 
@@ -197,8 +273,8 @@ void Thz55EcoComponent::handle_timeout_() {
 }
 
 void Thz55EcoComponent::fail_current_request_(const char *reason) {
-  ESP_LOGW(TAG, "Request %02X (%s) failed in %s: %s", this->current_request_,
-           this->current_label_ == nullptr ? "unknown" : this->current_label_, this->state_name_(), reason);
+  ESP_LOGW(TAG, "Request %s failed in %s: %s", this->current_label_ == nullptr ? "unknown" : this->current_label_,
+           this->state_name_(), reason);
   this->end_cycle_();
 }
 
@@ -207,19 +283,19 @@ void Thz55EcoComponent::finish_current_request_(const std::vector<uint8_t> &resp
     this->fail_current_request_("invalid response");
     return;
   }
-  if (response.size() < 4 || response[3] != this->current_request_) {
-    ESP_LOGW(TAG, "Request %02X (%s) returned response key %02X", this->current_request_,
-             this->current_label_ == nullptr ? "unknown" : this->current_label_, response.size() >= 4 ? response[3] : 0);
+  if (!this->response_matches_current_request_(response)) {
+    ESP_LOGW(TAG, "Request %s returned an unexpected response key",
+             this->current_label_ == nullptr ? "unknown" : this->current_label_);
     this->state_ = ProtocolState::IDLE;
     this->start_next_request_();
     return;
   }
 
-  this->decode_and_publish_(this->current_request_, response);
+  this->decode_and_publish_(this->current_request_, this->current_request_size_, response);
   this->state_ = ProtocolState::IDLE;
   this->response_buffer_.clear();
   this->previous_byte_ = 0;
-  this->start_next_request_();
+  this->wait_before_next_request_();
 }
 
 void Thz55EcoComponent::end_cycle_() {
@@ -228,12 +304,20 @@ void Thz55EcoComponent::end_cycle_() {
   this->response_buffer_.clear();
   this->previous_byte_ = 0;
   this->current_request_message_.clear();
+  this->current_request_ = nullptr;
+  this->current_request_size_ = 0;
+  for (auto &part : this->composite_parts_) {
+    part.value = 0;
+    part.has_value = false;
+  }
 }
 
 const char *Thz55EcoComponent::state_name_() const {
   switch (this->state_) {
     case ProtocolState::IDLE:
       return "IDLE";
+    case ProtocolState::WAIT_REQUEST_DELAY:
+      return "WAIT_REQUEST_DELAY";
     case ProtocolState::WAIT_START_ACK:
       return "WAIT_START_ACK";
     case ProtocolState::WAIT_DATA_AVAILABLE:
@@ -244,8 +328,13 @@ const char *Thz55EcoComponent::state_name_() const {
   return "UNKNOWN";
 }
 
-std::vector<uint8_t> Thz55EcoComponent::create_request_message_(uint8_t request) const {
-  std::vector<uint8_t> message{HEADER_START, GET, 0x00, request, ESCAPE, END};
+std::vector<uint8_t> Thz55EcoComponent::create_request_message_(const uint8_t *request, uint8_t request_size) const {
+  std::vector<uint8_t> message{HEADER_START, GET, 0x00};
+  for (uint8_t index = 0; index < request_size; index++) {
+    message.push_back(request[index]);
+  }
+  message.push_back(ESCAPE);
+  message.push_back(END);
   message[2] = this->calculate_checksum_(message);
   return this->add_duplicated_bytes_(message);
 }
@@ -328,10 +417,36 @@ bool Thz55EcoComponent::verify_header_(const std::vector<uint8_t> &response) con
   return true;
 }
 
-bool Thz55EcoComponent::request_has_registered_point_(uint8_t request) const {
+bool Thz55EcoComponent::request_matches_(const uint8_t *left, uint8_t left_size, const uint8_t *right,
+                                         uint8_t right_size) const {
+  if (left_size != right_size)
+    return false;
+  for (uint8_t index = 0; index < left_size; index++) {
+    if (left[index] != right[index])
+      return false;
+  }
+  return true;
+}
+
+bool Thz55EcoComponent::response_matches_current_request_(const std::vector<uint8_t> &response) const {
+  if (this->current_request_ == nullptr || this->current_request_size_ == 0)
+    return false;
+  if (response.size() < static_cast<size_t>(3 + this->current_request_size_))
+    return false;
+  for (uint8_t index = 0; index < this->current_request_size_; index++) {
+    if (response[3 + index] != this->current_request_[index])
+      return false;
+  }
+  return true;
+}
+
+bool Thz55EcoComponent::request_has_registered_point_(const uint8_t *request, uint8_t request_size) const {
   for (const auto &point : THZ55ECO_POINTS) {
-    if (point.request != request)
+    if (!this->request_matches_(point.request, point.request_size, request, request_size))
       continue;
+
+    if (this->composite_part_is_needed_(point.key))
+      return true;
 
     for (const auto &registration : this->numeric_sensors_) {
       if (registration.key == point.key)
@@ -345,9 +460,23 @@ bool Thz55EcoComponent::request_has_registered_point_(uint8_t request) const {
   return false;
 }
 
-void Thz55EcoComponent::decode_and_publish_(uint8_t request, const std::vector<uint8_t> &response) {
+bool Thz55EcoComponent::composite_part_is_needed_(const char *part_key) const {
+  for (const auto &definition : COMPOSITE_VALUES) {
+    if (std::strcmp(definition.low_key, part_key) != 0 && std::strcmp(definition.high_key, part_key) != 0)
+      continue;
+
+    for (const auto &registration : this->numeric_sensors_) {
+      if (registration.key == definition.key)
+        return true;
+    }
+  }
+  return false;
+}
+
+void Thz55EcoComponent::decode_and_publish_(const uint8_t *request, uint8_t request_size,
+                                            const std::vector<uint8_t> &response) {
   for (const auto &point : THZ55ECO_POINTS) {
-    if (point.request != request)
+    if (!this->request_matches_(point.request, point.request_size, request, request_size))
       continue;
     if (static_cast<size_t>(point.offset) + point.size > response.size())
       continue;
@@ -362,6 +491,7 @@ void Thz55EcoComponent::decode_and_publish_(uint8_t request, const std::vector<u
       }
     } else {
       const int32_t raw = this->read_signed_big_endian_(response, point);
+      this->store_composite_part_(point.key, raw);
       const float value = static_cast<float>(raw) * point.scale;
       for (const auto &registration : this->numeric_sensors_) {
         if (registration.key == point.key) {
@@ -371,6 +501,47 @@ void Thz55EcoComponent::decode_and_publish_(uint8_t request, const std::vector<u
       }
     }
   }
+  this->publish_composite_values_();
+}
+
+void Thz55EcoComponent::store_composite_part_(const char *key, int32_t value) {
+  for (auto &part : this->composite_parts_) {
+    if (std::strcmp(part.key, key) == 0) {
+      part.value = value;
+      part.has_value = true;
+      return;
+    }
+  }
+}
+
+void Thz55EcoComponent::publish_composite_values_() {
+  for (auto &definition : this->composite_values_) {
+    if (definition.published)
+      continue;
+
+    const auto *low = this->find_composite_part_(definition.low_key);
+    const auto *high = this->find_composite_part_(definition.high_key);
+    if (low == nullptr || high == nullptr || !low->has_value || !high->has_value)
+      continue;
+
+    const float value = static_cast<float>(low->value) * definition.low_scale +
+                        static_cast<float>(high->value) * definition.high_scale;
+    for (const auto &registration : this->numeric_sensors_) {
+      if (registration.key == definition.key) {
+        registration.sensor->publish_state(value);
+        definition.published = true;
+        break;
+      }
+    }
+  }
+}
+
+const CompositePartValue *Thz55EcoComponent::find_composite_part_(const char *key) const {
+  for (const auto &part : this->composite_parts_) {
+    if (std::strcmp(part.key, key) == 0)
+      return &part;
+  }
+  return nullptr;
 }
 
 int32_t Thz55EcoComponent::read_signed_big_endian_(const std::vector<uint8_t> &response,

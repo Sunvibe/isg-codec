@@ -91,7 +91,9 @@ See [THZ 5.5 Eco Protocol Notes](docs/thz55eco-protocol-notes.md) for the curren
 
 ## ESPHome Native THZ 5.5 Eco Component
 
-The repository also contains an ESPHome external component in `components/thz55eco` for reading the THZ 5.5 Eco directly on an ESP32-S3 and exposing selected values to Home Assistant through the ESPHome native API. The native component has been verified with the `FB` global aggregate request through the ESP32-S3 USB-OTG and CP2102 diagnostic interface path.
+The repository also contains an ESPHome external component in `components/thz55eco` for reading the THZ 5.5 Eco directly on an ESP32-S3 and exposing selected values to Home Assistant through the ESPHome native API. The native component has been verified with the `FB` global aggregate request through the ESP32-S3 USB-OTG and CP2102 diagnostic interface path, and its point table also includes XML-derived electrical consumption and heat counter requests such as `0A091C` and `0A092A`.
+
+Electrical and heat energy counters are exposed as composite values from adjacent low/high 16-bit requests. For example, `electrical_heating_circuit_total` uses `0A0920 + 0A0921 * 1000`, and `heat_heating_circuit_total` uses `0A0930 + 0A0931 * 1000`. This has been verified on an ESPHome device with plausible totals such as `4026 kWh` electrical heating circuit energy and `17055 kWh` delivered heating circuit heat.
 
 Start from [THZ 5.5 Eco ESPHome Native Component Notes](docs/thz55eco-esphome-native-component-notes.md) and [the example ESPHome YAML](docs/thz55eco-esphome-native-component-example.yaml).
 

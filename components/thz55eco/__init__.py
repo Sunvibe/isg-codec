@@ -10,6 +10,7 @@ CONF_BYTE_TIMEOUT = "byte_timeout"
 CONF_MAX_RETRY = "max_retry"
 CONF_INITIAL_FLUSH_TIMEOUT = "initial_flush_timeout"
 CONF_STARTUP_DELAY = "startup_delay"
+CONF_REQUEST_DELAY = "request_delay"
 
 thz55eco_ns = cg.esphome_ns.namespace("thz55eco")
 Thz55EcoComponent = thz55eco_ns.class_(
@@ -25,6 +26,7 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_BYTE_TIMEOUT, default="1200ms"): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_INITIAL_FLUSH_TIMEOUT, default="200ms"): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_STARTUP_DELAY, default="10s"): cv.positive_time_period_milliseconds,
+            cv.Optional(CONF_REQUEST_DELAY, default="1200ms"): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_MAX_RETRY, default=5): cv.int_range(min=1, max=20),
         }
     )
@@ -41,4 +43,5 @@ async def to_code(config):
     cg.add(var.set_byte_timeout(config[CONF_BYTE_TIMEOUT].total_milliseconds))
     cg.add(var.set_initial_flush_timeout(config[CONF_INITIAL_FLUSH_TIMEOUT].total_milliseconds))
     cg.add(var.set_startup_delay(config[CONF_STARTUP_DELAY].total_milliseconds))
+    cg.add(var.set_request_delay(config[CONF_REQUEST_DELAY].total_milliseconds))
     cg.add(var.set_max_retry(config[CONF_MAX_RETRY]))
